@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "Timer.h"
 
 #define SETCOLOR(c, r, g, b) {c[0]=r; c[1]=g; c[2]=b;}
 
@@ -21,6 +22,8 @@ private:
 	float m_canvas_width;
 	float m_canvas_height;
 	std::string m_window_title;
+
+	Timer * timer;
 	
 	Player * m_player;
 	Platform* m_platform;

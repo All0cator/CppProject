@@ -476,36 +476,6 @@ namespace graphics
 	void setResizeFunction(std::function<void(int, int)> resize);
 	/** @}*/
 
-	/** Specifies a user-defined function to be called each time the menu is specified.
-
-	Typically, this function is used for specifying an overlay menu for cases where we want to do parameterization
-	ie change variables during runtime with a user friendly GUI of our Game 
-	for example we can display a menu and create a slider so we can control our player's speed
-
-
-	\param menuSpecificationFunction is the user-defined function passed.
-
-	Potential usage:
-
-	\code{.cpp}
-	void menu()
-	{
-
-	}
-
-	int main()
-	{
-		...
-		graphics::createWindow(960, 540, "Night of the Living Arkanoid");
-		graphics::setMenuFunction(menu);
-		...
-		return 0;
-	}
-	\endcode
-	*/
-	void setMenuFunction(std::function<void()> menuSpecificationFunction);
-	/** @}*/
-
 	/** \defgroup _INPUT Input handling
 	* @{
 	*/

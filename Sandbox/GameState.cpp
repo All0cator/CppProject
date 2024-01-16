@@ -2,6 +2,8 @@
 #include "Player.h"
 #include "Platform.h"
 
+#include <iostream>
+
 GameState* GameState::m_instance = nullptr;
 
 GameState::GameState()
@@ -23,15 +25,24 @@ void GameState::update(float dt)
 	// dt is in milliseconds so / 1000.0f will make it in seconds
 	float deltaTime = dt / 1000.0f;
 
+	if (timer->IsRunning())
+	{
+		timer->Update(dt);
+		std::cout << timer->GetAccumulatedTime() << std::endl;
+	}
+
 	m_player->update(deltaTime);
 	m_platform->update(deltaTime);
 }
 
 void GameState::init()
 {
-	m_assets_path = "assets\\";
-	m_textures_path = "textures\\";
-	m_sounds_path = "sounds\\";
+	timer = new Timer(2.0f, false, nullptr);
+	timer->Start();
+
+	m_assets_path = "assets/";
+	m_textures_path = "textures/";
+	m_sounds_path = "sounds/";
 
 	m_window_width = 800;
 	m_window_height = 800;
@@ -40,8 +51,8 @@ void GameState::init()
 	m_canvas_width = 10.0f;
 	m_canvas_height = 10.0f;
 
-	m_player = new Player(GameState::inst(), "Player", "player\\boy2.png", "player\\");
-	m_platform = new Platform(GameState::inst(), "Platform", "blocks\\red_block.png", "");
+	m_player = new Player(GameState::inst(), "player/", "player/boy2.png", "Player");
+	m_platform = new Platform(GameState::inst(), "", "blocks/red_block.png", "Platform");
 
 	m_player->init();
 	m_platform->init();
