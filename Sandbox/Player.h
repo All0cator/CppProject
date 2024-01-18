@@ -1,10 +1,12 @@
 #pragma once
 
 #include "GameObject.h"
+#include "Actor.h"
 
-class Player : public GameObject
+class Player : public GameObject, public Actor
 {
 private:
+
 	std::string m_full_textures_path;
 	std::string m_full_sounds_path;
 	int m_texture_size_width;

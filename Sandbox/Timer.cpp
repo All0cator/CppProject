@@ -49,6 +49,13 @@ void Timer::Update(float dt_in_milliseconds)
 
 void Timer::Stop()
 {
+	if (m_looping)
+	{
+		Reset(0.0f, true);
+		Start();
+		return;
+	}
+
 	m_is_stopped = true;
 }
 

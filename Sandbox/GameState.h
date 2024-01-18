@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Timer.h"
+#include <unordered_map>
 
 #define SETCOLOR(c, r, g, b) {c[0]=r; c[1]=g; c[2]=b;}
 
@@ -22,11 +23,19 @@ private:
 	float m_canvas_width;
 	float m_canvas_height;
 	std::string m_window_title;
+	
+	// Maps index to graphic tile
+	std::unordered_map<int, std::string > tiles;
 
 	Timer * timer;
 	
 	Player * m_player;
+
+	// Player constants
+
 	Platform* m_platform;
+
+	// Platform constants
 
 public:
 	static GameState * inst();
