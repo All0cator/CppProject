@@ -2,12 +2,12 @@
 
 #include <string>
 #include "Timer.h"
+#include "Constants.h"
 #include <unordered_map>
-
-#define SETCOLOR(c, r, g, b) {c[0]=r; c[1]=g; c[2]=b;}
 
 class Player;
 class Platform;
+class Level;
 
 class GameState
 {
@@ -18,6 +18,7 @@ private:
 	std::string m_assets_path;
 	std::string m_textures_path;
 	std::string m_sounds_path;
+	std::string m_levels_path;
 	int m_window_width;
 	int m_window_height;
 	float m_canvas_width;
@@ -28,6 +29,8 @@ private:
 	std::unordered_map<int, std::string > tiles;
 
 	Timer * timer;
+
+	Level* m_current_level;
 	
 	Player * m_player;
 

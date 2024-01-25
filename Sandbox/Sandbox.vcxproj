@@ -141,9 +141,14 @@
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="CSVParse.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="Layer.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ParallaxBackground.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Timer.cpp" />
@@ -152,10 +157,15 @@
     <ClInclude Include="..\include\ImGui\imgui.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="Box.h" />
     <ClInclude Include="Constants.h" />
+    <ClInclude Include="CSVParse.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="Layer.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="ParallaxBackground.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Timer.h" />
