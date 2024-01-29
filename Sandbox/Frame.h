@@ -9,5 +9,5 @@
 class Frame
 {
 public:
-	std::string m_frame_name;
+	std::string m_path_to_frame;
 };

@@ -1,26 +1,25 @@
 #include "Box.h"
-#include "Constants.h"
+#include "GraphicsConstants.h"
 #include <iostream>
+#include "GameObject.h"
 
-Box::Box(float width_pixels, float height_pixels, float x_center_pixels, float y_center_pixels)
+Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_pixels, Type type, SubType sub_type)
 {
 	if (width_pixels <= 0.0f || height_pixels <= 0.0f)
 	{
 		std::cout << "Error: Negative width and height gived to Box: (W) : " << width_pixels << " (H) : " << height_pixels << std::endl;
 	}
 
-	// Converts pixels to canvas units boolean parameter means clamp value to window's edges
-	float width_canvas_units = graphics::windowToCanvasX(width_pixels, false);
-	float height_canvas_units = graphics::windowToCanvasY(height_pixels, false);
+	this->m_type = type;
+	this->m_sub_type = sub_type;
 
-	float x_center_canvas_units = graphics::windowToCanvasX(x_center_pixels, false);
-	float y_center_canvas_units = graphics::windowToCanvasY(y_center_pixels, false);
+	this->m_width_pixels = width_pixels;
+	this->m_height_pixels = height_pixels;
 
-	this->m_half_width = width_canvas_units / 2.0f;
-	this->m_half_height = height_canvas_units / 2.0f;
-
-	this->m_x_center = x_center_canvas_units;
-	this->m_y_center = y_center_canvas_units;
+	this->m_top = left_pixels;
+	this->m_left= top_pixels;
+	this->m_right = left_pixels + width_pixels;
+	this->m_bottom = top_pixels + height_pixels;
 
 	setOutlineParameters(1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
 }

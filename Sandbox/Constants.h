@@ -1,20 +1,31 @@
 #pragma once
 
-#define SETCOLOR(c, r, g, b) {c[0]=r; c[1]=g; c[2]=b;}
-
 // Levels
 
 // Tile Groups
 
 #define GROUP_NAME_COLLISION			"Collision"
+#define GROUP_NAME_COLLISION_NUM		2
 #define GROUP_NAME_ENVIRONMENT			"Environment"
+#define GROUP_NAME_ENVIRONMENT_NUM		9
 
 // Parallax
 
+#define PARALLAX_WIDTH 512
+#define PARALLAX_HEIGHT 320
+
 #define PARALLAX_NAME_0					"BGFront"
+#define PARALLAX_NAME_0_SPEED_X			0.85f
+#define PARALLAX_NAME_0_SPEED_Y			1.0f
 #define PARALLAX_NAME_1					"BGBack"
+#define PARALLAX_NAME_1_SPEED_X			0.75f	
+#define PARALLAX_NAME_1_SPEED_Y			1.0f
 #define PARALLAX_NAME_2					"CloudsFront"
+#define PARALLAX_NAME_2_SPEED_X			0.5f
+#define PARALLAX_NAME_2_SPEED_Y			1.0f
 #define PARALLAX_NAME_3					"CloudsBack"
+#define PARALLAX_NAME_3_SPEED_X			0.25f
+#define PARALLAX_NAME_3_SPEED_Y			1.0f
 
 // Layers
 
@@ -31,14 +42,17 @@
 #define LAYERS_ENVIRONMENT_ROCKSFORE	"RocksForeground"
 #define LAYERS_ENVIRONMENT_ROCKSBACK	"RocksBackground"
 
+
 // Knight
+
+// Knight creation info
 
 #define KNIGHT_ANIM_ATTACKCOMBO2HIT					"AttackCombo2hit"
 #define KNIGHT_ANIM_ATTACKCOMBO2HIT_FRAMES			10
 #define KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT			"AttackComboNoMovement"
 #define KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT_FRAMES	10
-#define KNIGHT_ANIM_CROUCHALL						"CrouchAll"
-#define KNIGHT_ANIM_CROUCHALL						3
+#define KNIGHT_ANIM_CROUCHIDLE						"CrouchIdle"
+#define KNIGHT_ANIM_CROUCHIDLE_FRAMES			    1
 #define KNIGHT_ANIM_CROUCHATTACK					"CrouchAttack"
 #define KNIGHT_ANIM_CROUCHATTACK_FRAMES				4
 #define KNIGHT_ANIM_CROUCHTRANSITION				"CrouchTransition"
@@ -60,7 +74,7 @@
 #define KNIGHT_ANIM_JUMP							"Jump"
 #define KNIGHT_ANIM_JUMP_FRAMES						3
 #define KNIGHT_ANIM_JUMPFALLINBETWEEN				"JumpFallInBetween"
-#define KNIGHT_ANIM_JUMPFALLINBETWEEN				2
+#define KNIGHT_ANIM_JUMPFALLINBETWEEN_FRAMES		2
 #define KNIGHT_ANIM_RUN								"Run"
 #define KNIGHT_ANIM_RUN_FRAMES						10
 #define KNIGHT_ANIM_TURN_ARROUND					"TurnArround"
@@ -68,5 +82,8 @@
 
 // Skeleton
 
+// Skeleton create info
+
 #define SKELETON_ANIM_IDLE				"Idle"
 #define SKELETONO_ANIM_IDLE_FRAMES		4
+#define SKELETON_ANIM_
