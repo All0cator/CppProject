@@ -27,14 +27,19 @@ void Timer::Start()
 	m_accumulated_time_in_milliseconds = 0.0f;
 }
 
-void Timer::Update(float dt_in_milliseconds)
+void Timer::Update(float dt, TimeUnit unit)
 {
+	if (unit == TimeUnit::SECONDS)
+	{
+		dt *= 1000.0f;
+	}
+
 	if (m_is_stopped)
 	{
 		return;
 	}
 	
-	m_accumulated_time_in_milliseconds += dt_in_milliseconds;
+	m_accumulated_time_in_milliseconds += dt;
 
 	if (m_accumulated_time_in_milliseconds >= m_timeout_in_milliseconds)
 	{

@@ -4,6 +4,7 @@
 #include "Animation.h"
 #include "Timer.h"
 #include "Enemy.h"
+#include "Area.h"
 
 Player::Player(GameState* gs,
 			   const std::string& sounds_path,
@@ -13,18 +14,22 @@ Player::Player(GameState* gs,
 			   float animation_speed_FPS,
 			   float width_pixels,
 			   float height_pixels,
-			   float x_center_pixels,
-			   float y_center_pixels,
+			   float left_pixels,
+			   float top_pixels,
 			   const std::string& name,
 			   float R = 1.0f,
 			   float G = 0.0f,
 			   float B = 0.0f)
 	: GameObject(gs, name),
 	  Actor(animation_names, frames_per_animation, animation_speed_FPS),
-	  Box(width_pixels, height_pixels, x_center_pixels, y_center_pixels, R, G, B)
+	  Box(width_pixels, height_pixels, left_pixels, top_pixels, Type::DYNAMIC, SubType::PLAYER, R, G, B)
 {
 	m_full_textures_path = m_state->inst()->getTexturesPath() + textures_path;
 	m_full_sounds_path = m_state->inst()->getSoundsPath() + sounds_path;
+
+	m_ground_collider = new Area(width_pixels, height_pixels, left_pixels, top_pixels, , SubType::RECTANGLE);
+	m_jump_timer = new Timer(1.0f);
+	m_invincibility_timer = new Timer(1.0f);
 }
 
 void Player::update(float dt) 
@@ -295,6 +300,7 @@ void Player::updateAnimation()
 
 void Player::updateTimers(float dt)
 {
+	updateAnimationTimer(dt);
 	m_jump_timer->Update(dt);
 	m_invincibility_timer->Update(dt);
 }
@@ -370,9 +376,9 @@ void Player::init()
 	m_brush.outline_opacity = 0.0f;
 	m_brush.texture = m_full_textures_path;
 
-	m_ground_collider = new Box(m_half_width, 8.0f, m_pos_x, m_pos_y);
-	m_jump_timer = new Timer(1.0f);
-	m_invincibility_timer = new Timer(0.5f);
+	m_ground_collider->updatePositions(m_pos_x, m_pos_y, m_pos_x + m_width_pixels / 2.0f);
+	m_jump_timer->Reset();
+	m_invincibility_timer->Reset();
 
 	GameObject::init();
 }
@@ -381,7 +387,8 @@ void Player::draw()
 {
 	if (m_is_disabled) return;
 
-	m_brush.texture = getCurrentFrame().m_path_to_frame;
+	m_brush.texture = getCurrentFrame();
+	
 	if (m_is_flickering)
 	{
 		m_brush.fill_opacity = std::cos(std::fmod(m_invincibility_timer->GetAccumulatedTime(), 1.0f));
@@ -424,6 +431,22 @@ void Player::correctPos(Box & other)
 
 	m_is_grounded = true;
 }
+
+
+void Player::collidedWithGround(Box& other)
+{
+	if (other.m_type == Type::STATIC)
+	{
+		m_is_jumping = false;
+	}
+}
+
+
+float Player::getDmg()
+{
+	return m_dmg;
+}
+
 
 void Player::resolveCollision(Box& other)
 {

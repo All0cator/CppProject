@@ -10,6 +10,7 @@ class Player;
 class Platform;
 class Level;
 class Box;
+class Tileset;
 
 class GameState
 {
@@ -27,15 +28,13 @@ private:
 	float m_canvas_width;
 	float m_canvas_height;
 	std::string m_window_title;
-	
-	// Maps index to graphic tile
-	std::unordered_map<int, std::string > tiles;
-
-	Timer * timer;
 
 	Level* m_current_level;
 	
 	Player * m_player;
+
+	std::vector<Level*> m_levels;
+	std::vector<Tileset*> m_tilesets;
 
 	// Player constants
 
@@ -57,6 +56,7 @@ public:
 
 public:
 	static GameState * inst();
+	~GameState();
 
 	void update(float dt);
 	void checkCollision();
@@ -64,11 +64,15 @@ public:
 	void draw();
 
 	void preLoadTextures(const std::vector<std::string>& directories);
+	void createTilesets(const std::vector<std::string>& tileset_paths,
+						const std::vector<int>& tileset_max_indices);
+	void createLevels();
 	bool collide(Box& a, Box& b);
 	void testCollisions();
 
 	std::string getTexturesPath();
 	std::string getSoundsPath();
+	Tileset* getTileset(int index);
 	int getWindowWidth(); // In pixels
 	int getWindowHeight(); // In pixels
 	float getCanvasWidth(); // In canvas Units

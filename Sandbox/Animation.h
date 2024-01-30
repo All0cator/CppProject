@@ -5,11 +5,10 @@
 class Animation
 {
 public:
-	bool m_is_flipped;
 	unsigned int m_num_frames;
 	Frame* m_frames;
 
 public:
-	Animation();
+	Animation(unsigned int num_frames);
 	virtual ~Animation();
 };

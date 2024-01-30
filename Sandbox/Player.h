@@ -5,12 +5,13 @@
 #include "Box.h"
 
 class Timer;
+class Area;
 
 class Player : public GameObject, public Actor, public Box
 {
 
 public:
-	enum State { DEAD, HIT, TURNING_ARROUND, GROUND, TRANSITION_CROUCH, CROUCH, AIR, TRANSITION_FALL, FALL };
+	static enum State { DEAD, HIT, TURNING_ARROUND, GROUND, TRANSITION_CROUCH, CROUCH, AIR, TRANSITION_FALL, FALL };
 private:
 
 	State m_movement_state;
@@ -23,8 +24,7 @@ private:
 	float m_scale_x;
 	float m_scale_y;
 
-	Box* m_ground_collider;
-	State m_state;
+	Area* m_ground_collider;
 	Timer* m_jump_timer;
 	Timer* m_invincibility_timer;
 
@@ -64,9 +64,6 @@ private:
 	bool m_is_turning_arround;
 	bool m_is_flickering;
 
-
-	// Acceleration could also be specified here
-
 	graphics::Brush m_brush;
 
 public:
@@ -78,8 +75,8 @@ public:
 		   float animation_speed_FPS,
 		   float width_pixels,
 		   float height_pixels,
-		   float x_center_pixels,
-		   float y_center_pixels,
+		   float left_pixels,
+		   float top_pixels,
 		   const std::string& name,
 		   float R = 0.0f,
 		   float G = 0.0f,
@@ -92,9 +89,11 @@ public:
 	void updateMovement(float dt);
 	void takeDmg(float ammount);
 	void correctPos(Box& other);
+	void collidedWithGround(Box& other);
 	virtual void init() override;
 	virtual void draw() override;
 	virtual ~Player();
+	float getDmg();
 	virtual void resolveCollision(Box& other) override;
 protected:
 	

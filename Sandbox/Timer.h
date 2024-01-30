@@ -21,7 +21,7 @@ public:
 		  TimeUnit unit = TimeUnit::SECONDS);
 	virtual ~Timer();
 	void Start();
-	void Update(float dt_in_milliseconds);
+	void Update(float dt_in_milliseconds, TimeUnit unit = TimeUnit::SECONDS);
 	void Stop();
 	void Reset(float new_timeout = 0.0f, 
 			   bool looping = false,

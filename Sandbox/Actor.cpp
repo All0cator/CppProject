@@ -1,43 +1,93 @@
 #include "Actor.h"
+#include "Animation.h"
+#include "Timer.h"
 
 Actor::Actor(const std::vector<std::string>& animation_names,
 			 const std::vector<unsigned int>& frames_per_animation,
 			 float animation_speed_FPS)
 {
-	this->m_animations = new Animation*[animation_names.size()];
+	this->m_animations = std::vector<Animation*>(animation_names.size());
 
-	for (unsigned int i = 0; i < animation_names.size(); i++)
+	for (int i = 0; i < animation_names.size() && i < frames_per_animation.size(); i++)
 	{
-		this->m_animations[i] = new Animation();
-
-		this->m_animation_states[animation_names[i]] = i;
+		this->m_animations[i] = new Animation(frames_per_animation[i]);
+		this->m_animation_name_to_index[animation_names[i]] = i;
 	}
+
+	this->m_time_per_frame_seconds = animation_speed_FPS / 60.0f;
+	this->m_frame_timer = new Timer(this->m_time_per_frame_seconds, true, std::bind(&Actor::updateCurrentFrameIndex, this), Timer::TimeUnit::SECONDS);
+	this->m_current_frame_index = 0;
+
+	resetAnimationConstants("NULL");
 }
 
 Actor::~Actor()
 {
-	delete [] this->m_animations;
-	delete this->m_fps;
+	for (int i = 0; i < this->m_animations.size(); i++)
+	{
+		delete this->m_animations[i];
+	}
+	delete this->m_frame_timer;
 }
 
-void Actor::flipAnimation()
+void Actor::resetAnimationConstants(const std::string& animation_name)
 {
+	this->m_current_frame_index = 0;
+	this->m_frame_timer->Reset(0.0f, true);
+	this->m_current_animation_name = animation_name;
+	if (m_animation_name_to_index.find(animation_name) != m_animation_name_to_index.end())
+	{
+		this->m_current_animation = m_animations[m_animation_name_to_index[animation_name]];
+	}
 }
 
 bool Actor::playAnimation(const std::string& animation_name)
 {
+	if (animation_name != m_current_animation_name)
+	{
+		resetAnimationConstants(animation_name);
+	}
+
+	if (m_current_frame_index >= m_current_animation->m_num_frames)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
-void Actor::setupAnimationStates(const std::string* states)
+void Actor::updateAnimationTimer(float dt)
 {
+	m_frame_timer->Update(dt, Timer::TimeUnit::SECONDS);
+
 }
 
-void Actor::updateAnimation()
+void Actor::updateCurrentFrameIndex()
 {
+	this->m_current_frame_index++;
+}
 
+const std::string& Actor::getCurrentAnimationName()
+{
+	return this->m_current_animation_name;
 }
 
 unsigned int Actor::getCurrentFrameIndex()
 {
 	return m_current_frame_index;
+}
+
+bool Actor::animationFinished()
+{
+	if (!m_current_animation) return true;
+
+	return m_current_frame_index >= m_current_animation->m_num_frames;
+}
+
+const std::string& Actor::getCurrentFrame()
+{
+	if (!m_current_animation) return "NULL";
+	return m_current_animation->m_frames[m_current_frame_index].m_path_to_frame;
 }

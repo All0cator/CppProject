@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 struct ParseInfo
 {
 	int width; // number of collumns
 	int height; // number of rows
-	int* int_array;
+	std::vector<int> int_array;
 };
 
 class CSVParse

@@ -2,28 +2,28 @@
 #include "GameObject.h"
 #include <unordered_map>
 
+class Tileset;
+
 class Layer : public GameObject
 {
 private:
-	std::string m_tileset_path;
-	// Maps index of tile to the graphic texture
-	std::unordered_map<int, bool> m_index_texture_exists;
+	Tileset* m_tileset;
 
 	// Number of tiles horizontally and vertically
 	int m_width;
 	int m_height;
 	// The array of indices
-	int* m_map;
+	std::vector<int> m_map;
 
 	graphics::Brush m_tile_brush;
 
 public:
 	Layer(GameState* gs,
 		  const std::string& name = "",
-		  const std::string& tileset_path,
+		  Tileset * tileset,
 		  int width,
 		  int height,
-		  int * map);
+		  const std::vector<int>& map);
 	virtual ~Layer();
 	virtual void update(float dt) override;
 	virtual void init() override;

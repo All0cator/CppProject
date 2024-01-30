@@ -9,6 +9,15 @@
 #define GROUP_NAME_ENVIRONMENT			"Environment"
 #define GROUP_NAME_ENVIRONMENT_NUM		9
 
+// Tile sets
+#define TILESET_FOREST					"forest"
+#define TILESET_FOREST_TEXTURES_MAX		57
+#define TILESET_TREES					"trees"
+#define TILESET_TREES_TEXTURES_MAX		126
+#define TILESET_COLLISION_TILE			"collision_tile"
+#define TILESET_COLLISION_TILE_MAX		1
+
+#define TILESET_COUNT					3
 // Parallax
 
 #define PARALLAX_WIDTH 512
@@ -45,8 +54,6 @@
 
 // Knight
 
-// Knight creation info
-
 #define KNIGHT_ANIM_ATTACKCOMBO2HIT					"AttackCombo2hit"
 #define KNIGHT_ANIM_ATTACKCOMBO2HIT_FRAMES			10
 #define KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT			"AttackComboNoMovement"
@@ -82,8 +89,13 @@
 
 // Skeleton
 
-// Skeleton create info
-
+#define SKELETON_ANIM_ATTACK			"Attack"
+#define SKELETON_ANIM_ATTACK_FRAMES		13
+#define SKELETON_ANIM_DEATH				"Death"
+#define SKELETON_ANIM_DEATH_FRAMES		13
+#define SKELETON_ANIM_HIT				"Hit"
+#define SKELETON_ANIM_HIT_FRAMES		3
 #define SKELETON_ANIM_IDLE				"Idle"
-#define SKELETONO_ANIM_IDLE_FRAMES		4
-#define SKELETON_ANIM_
+#define SKELETON_ANIM_IDLE_FRAMES		4
+#define SKELETON_ANIM_WALK				"Walk"
+#define SKELETON_ANIM_WALK_FRAMES		12

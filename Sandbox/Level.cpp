@@ -11,8 +11,11 @@ Level::Level(GameState* gs,
 			 const std::string& name = "",
 			 const std::string& level_path,
 			 const std::string& parallax_path,
-			 const std::vector<std::string>& layer_tileset_paths,
-			 const std::vector<std::string>& layer_names,
+			 const std::vector<int>& tileset_indices,
+			 const std::vector<std::string>& group_names,
+			 const std::vector<int>& group_indices,
+			 const std::vector<std::string>& environment_layer_names,
+			 const std::vector<std::string>& collision_layer_names,
 			 const std::vector<std::string>& parallax_names,
 			 const std::vector<float>& parallax_speeds_x,
 			 const std::vector<float>& parallax_speeds_y)
@@ -20,8 +23,11 @@ Level::Level(GameState* gs,
 {
 	this->m_level_path = level_path;
 	this->m_parallax_path = parallax_path;
-	this->m_layer_tilesets_path = layer_tileset_paths;
-	this->m_layer_names = layer_names;
+	this->m_tileset_indices = tileset_indices;
+	this->m_group_names = group_names;
+	this->m_group_indices = group_indices;
+	this->m_environment_layer_names = environment_layer_names;
+	this->m_collision_layer_names = collision_layer_names;
 	this->m_parallax_names = parallax_names;
 	this->m_parallax_speeds_x = parallax_speeds_x;
 	this->m_parallax_speeds_y = parallax_speeds_y;
@@ -74,17 +80,22 @@ void Level::init()
 
 	ParseInfo info = {};
 
-	for (int i = 0; i < m_environment_layers.size(); i++)
+	for (int i = 0; i < m_environment_layer_names.size(); i++)
 	{
-		info = CSVParse::parseInts(m_layer_names[i], ',');
+		info = CSVParse::parseInts(m_name + "._" + m_group_names[m_group_indices[i]] + "_" + m_environment_layer_names[i], ',');
 
 		m_environment_layers[i] = new Layer(GameState::inst(),
-											m_layer_names[i],
-											m_layer_tilesets_path[i],
+											m_environment_layer_names[i],
+											m_state->getTileset(m_tileset_indices[i]),
 											info.width, info.height, 
 											info.int_array);
 
 		m_environment_layers[i]->init();
+	}
+
+	for (int i = 0; i < m_collision_layer_names.size(); i++)
+	{
+
 	}
 
 	GameObject::init();
