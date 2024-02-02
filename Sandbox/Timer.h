@@ -12,7 +12,7 @@ private:
 	std::function<void()> m_timeout_function;
 
 public:
-	static enum TimeUnit { MILLISECONDS, SECONDS};
+	enum TimeUnit { MILLISECONDS, SECONDS};
 
 public:
 	Timer(float timeout,
@@ -28,5 +28,5 @@ public:
 			   std::function<void()> timeout_function = nullptr,
 			   TimeUnit unit = TimeUnit::SECONDS);
 	bool IsRunning();
-	float GetAccumulatedTime(TimeUnit unit = TimeUnit::MILLISECONDS);	
+	float GetAccumulatedTime(TimeUnit unit = TimeUnit::SECONDS);	
 };

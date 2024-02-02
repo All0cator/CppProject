@@ -8,6 +8,8 @@ class Frame;
 #include <string>
 #include <vector>
 
+const std::string NULLString = "NULL";
+
 class Actor
 {
 protected:
@@ -24,6 +26,7 @@ private:
 	void resetAnimationConstants(const std::string & animation_name);
 public:
 	Actor(const std::vector<std::string>& animation_names,
+		  const std::vector<std::string>& animation_directories,
 		  const std::vector<unsigned int>& frames_per_animation,
 		  float animation_speed_FPS);
 	virtual ~Actor();

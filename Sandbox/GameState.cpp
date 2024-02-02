@@ -1,8 +1,10 @@
 #include "GameState.h"
 #include "Player.h"
-#include "Platform.h"
 #include "Level.h"
 #include "Tileset.h"
+#include "Enemy.h"
+#include "Area.h"
+#include "Camera.h"
 
 #include "GraphicsConstants.h"
 
@@ -11,7 +13,14 @@
 GameState* GameState::m_instance = nullptr;
 
 GameState::GameState()
-{}
+{
+	m_window_width = WINDOW_WIDTH;
+	m_window_height = WINDOW_HEIGHT;
+	m_window_title = "Project Cpp";
+
+	m_canvas_width = CANVAS_WIDTH;
+	m_canvas_height = CANVAS_HEIGHT;
+}
 
 GameState::~GameState()
 {
@@ -49,11 +58,23 @@ void GameState::update(float dt)
 		std::cout << timer->GetAccumulatedTime() << std::endl;
 	}*/
 
+	if (graphics::getKeyState(graphics::SCANCODE_Q))
+	{
+		if (!m_toggle_timer->IsRunning())
+		{
+			m_is_debug_mode = !m_is_debug_mode;
+			m_toggle_timer->Reset();
+		}
+	}
+
 
 	m_current_level->update(deltaTime);
 	m_player->update(deltaTime);
+	for (int i = 0; i < m_enemies.size(); i++)
+	{
+		m_enemies[i]->update(dt);
+	}
 
-	testCollisions();
 	//m_platform->update(deltaTime);
 }
 
@@ -63,155 +84,245 @@ void GameState::init()
 
 	m_textures_path = "textures/";
 	m_sounds_path = "sounds/";
-	m_levels_path = "levels/";
 
-	m_window_width = WINDOW_WIDTH;
-	m_window_height = WINDOW_HEIGHT;
-	m_window_title = "Project Cpp";
-
-	m_canvas_width = CANVAS_WIDTH;
-	m_canvas_height = CANVAS_HEIGHT;
+	m_is_debug_mode = false;
+	m_toggle_timer = new Timer(0.5f);
 
 	// Create Level 0
 
-	std::string m_levels_path = m_assets_path + "levels/";
-	std::string m_level0_path = m_levels_path + "level0/";
+	m_levels_path = m_assets_path + "levels/";
+	m_level0_path = m_levels_path + "level0/";
 		
-	std::vector<std::string> group_names    { GROUP_NAME_ENVIRONMENT, GROUP_NAME_COLLISION};
-	std::vector<int> group_indices { 0, 0, 
-									 1, 1,
-									 1, 1,
-									 1, 1,
-									 1, 1,
-									 1 };
+	group_names  = std::vector<std::string>{ GROUP_NAME_ENVIRONMENT, GROUP_NAME_COLLISION};
+	group_indices = std::vector<int>{ 1, 1,
+									 0, 0,
+									 0, 0,
+									 0, 0,
+									 0, 0,
+									 0 };
 
-	std::vector<std::string> environment_layer_names    { LAYERS_ENVIRONMENT_SPIKES, LAYERS_ENVIRONMENT_BRIDGES,
-														  LAYERS_ENVIRONMENT_FENCES, LAYERS_ENVIRONMENT_GRASS,
-														  LAYERS_ENVIRONMENT_BUSHES, LAYERS_ENVIRONMENT_BIGTREES,
-														  LAYERS_ENVIRONMENT_SMALLTREES, LAYERS_ENVIRONMENT_ROCKSFORE,
-														  LAYERS_ENVIRONMENT_ROCKSBACK };
-														  
-
-	std::vector<std::string> collision_layer_names		{ LAYERS_COLLISION_SOLIDTILES, LAYERS_COLLISION_SPIKES };
-
-	std::vector<std::string> level_layers;
+	layer_names  = std::vector<std::string>{ LAYERS_COLLISION_SOLIDTILES, LAYERS_COLLISION_SPIKES,
+											  LAYERS_ENVIRONMENT_SPIKES, LAYERS_ENVIRONMENT_BRIDGES,
+											  LAYERS_ENVIRONMENT_FENCES, LAYERS_ENVIRONMENT_GRASS,
+											  LAYERS_ENVIRONMENT_BUSHES, LAYERS_ENVIRONMENT_BIGTREES,
+											  LAYERS_ENVIRONMENT_SMALLTREES, LAYERS_ENVIRONMENT_ROCKSFORE,
+											  LAYERS_ENVIRONMENT_ROCKSBACK };
 
 	m_tilesets_path = m_assets_path + m_textures_path + "tiles/";
 
-	std::vector<std::string> tileset_paths { TILESET_FOREST, TILESET_TREES, TILESET_COLLISION_TILE };
-	std::vector<int> tileset_max_indices { TILESET_FOREST_TEXTURES_MAX, TILESET_TREES_TEXTURES_MAX, TILESET_COLLISION_TILE_MAX };
+	tileset_paths = std::vector<std::string>{ m_tilesets_path + TILESET_FOREST + "/",
+											  m_tilesets_path + TILESET_TREES + "/",
+											  m_tilesets_path + TILESET_COLLISION_TILE + "/"};
+	tileset_max_indices = std::vector<int>{ TILESET_FOREST_TEXTURES_MAX, TILESET_TREES_TEXTURES_MAX, TILESET_COLLISION_TILE_MAX };
 
 	createTilesets(tileset_paths, tileset_max_indices);
 
-	std::string tileset_collisiontile_path = m_tilesets_path + "collision_tile/";
-	std::string tileset_forest_path = m_tilesets_path + "forest/";
-	std::string tileset_trees_path = m_tilesets_path + "trees/";
+	tileset_collisiontile_path = m_tilesets_path + "collision_tile/";
+	tileset_forest_path = m_tilesets_path + "forest/";
+	tileset_trees_path = m_tilesets_path + "trees/";
 
-	std::vector<std::string> layer_tileset_paths { tileset_collisiontile_path, tileset_collisiontile_path,
-												   tileset_forest_path, tileset_forest_path,
-												   tileset_forest_path, tileset_forest_path,
-												   tileset_forest_path, tileset_trees_path, 
-												   tileset_trees_path, tileset_forest_path,
-												   tileset_forest_path };
+	tileset_indices = std::vector<int>{ 2, 2,
+									   0, 0,
+									   0, 0,
+									   0, 1, 
+									   1, 0,
+									   0 };
 	
-	std::string m_parallax_path = m_assets_path + m_textures_path + "parallax/";
+	m_parallax_path = m_assets_path + m_textures_path + "parallax/";
 
-	std::vector<std::string> parallax_names { PARALLAX_NAME_0, PARALLAX_NAME_1,
+	parallax_names = std::vector<std::string>{ PARALLAX_NAME_0, PARALLAX_NAME_1,
 											 PARALLAX_NAME_2, PARALLAX_NAME_3 };
 
-	std::vector<float> parallax_speeds_x { PARALLAX_NAME_0_SPEED_X, PARALLAX_NAME_1_SPEED_X, 
+	parallax_speeds_x = std::vector<float>{ PARALLAX_NAME_0_SPEED_X, PARALLAX_NAME_1_SPEED_X,
 										 PARALLAX_NAME_2_SPEED_X, PARALLAX_NAME_3_SPEED_X };
 
-	std::vector<float> parallax_speeds_y { PARALLAX_NAME_0_SPEED_Y, PARALLAX_NAME_1_SPEED_Y,
+	parallax_speeds_y = std::vector<float>{ PARALLAX_NAME_0_SPEED_Y, PARALLAX_NAME_1_SPEED_Y,
 										 PARALLAX_NAME_2_SPEED_Y, PARALLAX_NAME_3_SPEED_Y };
 
 
-	std::string m_knight_path = m_assets_path + m_textures_path + "knight/";
-	std::string m_skeleton_path = m_assets_path + m_textures_path + "skeleton/";
+	m_knight_path = m_assets_path + m_textures_path + "knight/";
+	m_skeleton_path = m_assets_path + m_textures_path + "skeleton/";
 
 	// textures
 	//		knight
 	//			Animations...
 	//		skeleton
-	//			Idle
+	//			Animations...
 	//		parallax
 	//		tiles
 	//			collision_tile
 	//			forest
 	//			trees
 
-	std::vector<std::string> directories { m_knight_path + KNIGHT_ANIM_ATTACKCOMBO2HIT + "/",
-										   m_knight_path + KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT + "/",
-										   m_knight_path + KNIGHT_ANIM_CROUCHIDLE + "/",
-										   m_knight_path + KNIGHT_ANIM_CROUCHATTACK + "/",
-										   m_knight_path + KNIGHT_ANIM_CROUCHTRANSITION + "/",
-										   m_knight_path + KNIGHT_ANIM_CROUCHWALK + "/",
-										   m_knight_path + KNIGHT_ANIM_DASH + "/",
-										   m_knight_path + KNIGHT_ANIM_DEATH + "/",
-										   m_knight_path + KNIGHT_ANIM_DEATHNOMOVEMENT + "/",
-										   m_knight_path + KNIGHT_ANIM_FALL + "/",
-										   m_knight_path + KNIGHT_ANIM_HIT + "/",
-										   m_knight_path + KNIGHT_ANIM_IDLE + "/",
-										   m_knight_path + KNIGHT_ANIM_JUMP + "/",
-										   m_knight_path + KNIGHT_ANIM_JUMPFALLINBETWEEN + "/",
-										   m_knight_path + KNIGHT_ANIM_RUN + "/",
-										   m_knight_path + KNIGHT_ANIM_TURN_ARROUND + "/",
-											
+	player_anim_directories = std::vector<std::string>{ m_knight_path + KNIGHT_ANIM_ATTACKCOMBO2HIT + "/",
+												  m_knight_path + KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT + "/",
+												  m_knight_path + KNIGHT_ANIM_CROUCHIDLE + "/",
+												  m_knight_path + KNIGHT_ANIM_CROUCHATTACK + "/",
+												  m_knight_path + KNIGHT_ANIM_CROUCHTRANSITION + "/",
+												  m_knight_path + KNIGHT_ANIM_CROUCHWALK + "/",
+												  m_knight_path + KNIGHT_ANIM_DASH + "/",
+												  m_knight_path + KNIGHT_ANIM_DEATH + "/",
+												  m_knight_path + KNIGHT_ANIM_DEATHNOMOVEMENT + "/",
+												  m_knight_path + KNIGHT_ANIM_FALL + "/",
+												  m_knight_path + KNIGHT_ANIM_HIT + "/",
+												  m_knight_path + KNIGHT_ANIM_IDLE + "/",
+												  m_knight_path + KNIGHT_ANIM_JUMP + "/",
+												  m_knight_path + KNIGHT_ANIM_JUMPFALLINBETWEEN + "/",
+												  m_knight_path + KNIGHT_ANIM_RUN + "/",
+												  m_knight_path + KNIGHT_ANIM_TURN_ARROUND + "/"
+												};
+	player_animation_names = std::vector<std::string>{ KNIGHT_ANIM_ATTACKCOMBO2HIT,
+													 KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT,
+													 KNIGHT_ANIM_CROUCHIDLE,
+													 KNIGHT_ANIM_CROUCHATTACK,
+													 KNIGHT_ANIM_CROUCHTRANSITION,
+													 KNIGHT_ANIM_CROUCHWALK,
+													 KNIGHT_ANIM_DASH,
+													 KNIGHT_ANIM_DEATH,
+													 KNIGHT_ANIM_DEATHNOMOVEMENT,
+													 KNIGHT_ANIM_FALL,
+													 KNIGHT_ANIM_HIT,
+													 KNIGHT_ANIM_IDLE,
+													 KNIGHT_ANIM_JUMP,
+													 KNIGHT_ANIM_JUMPFALLINBETWEEN,
+													 KNIGHT_ANIM_RUN, 
+													 KNIGHT_ANIM_TURN_ARROUND
+												   };
 
-										   m_skeleton_path + SKELETON_ANIM_ATTACK + "/",
-										   m_skeleton_path + SKELETON_ANIM_DEATH + "/",
-										   m_skeleton_path + SKELETON_ANIM_HIT + "/",
-										   m_skeleton_path + SKELETON_ANIM_IDLE + "/",
-										   m_skeleton_path + SKELETON_ANIM_WALK + "/",
-											
-										   
-										   m_parallax_path,
+	player_animation_frames = std::vector<unsigned int>{
+														KNIGHT_ANIM_ATTACKCOMBO2HIT_FRAMES,
+														KNIGHT_ANIM_ATTACKCOMBONOMOVEMENT_FRAMES,
+														KNIGHT_ANIM_CROUCHIDLE_FRAMES,
+														KNIGHT_ANIM_CROUCHATTACK_FRAMES,
+														KNIGHT_ANIM_CROUCHTRANSITION_FRAMES,
+														KNIGHT_ANIM_CROUCHWALK_FRAMES,
+														KNIGHT_ANIM_DASH_FRAMES,
+														KNIGHT_ANIM_DEATH_FRAMES,
+														KNIGHT_ANIM_DEATHNOMOVEMENT_FRAMES,
+														KNIGHT_ANIM_FALL_FRAMES,
+														KNIGHT_ANIM_HIT_FRAMES,
+														KNIGHT_ANIM_IDLE_FRAMES,
+														KNIGHT_ANIM_JUMP_FRAMES,
+														KNIGHT_ANIM_JUMPFALLINBETWEEN_FRAMES,
+														KNIGHT_ANIM_RUN_FRAMES,
+														KNIGHT_ANIM_TURN_ARROUND_FRAMES,
+													  };
 
-										   tileset_collisiontile_path,
-										   tileset_forest_path,
-										   tileset_trees_path};
+	skeleton_anim_directories = std::vector<std::string>{ m_skeleton_path + SKELETON_ANIM_ATTACK + "/",
+														m_skeleton_path + SKELETON_ANIM_DEATH + "/",
+														m_skeleton_path + SKELETON_ANIM_HIT + "/",
+														m_skeleton_path + SKELETON_ANIM_IDLE + "/",
+														m_skeleton_path + SKELETON_ANIM_WALK + "/"
+													  };
 
-	preLoadTextures(directories);
+	skeleton_animation_names  = std::vector<std::string>{ SKELETON_ANIM_ATTACK,
+													   SKELETON_ANIM_DEATH,
+													   SKELETON_ANIM_HIT,
+													   SKELETON_ANIM_IDLE,
+													   SKELETON_ANIM_WALK
+													 };
 
-	m_current_level = new Level(GameState::inst(), 
-								"level0", 
-								m_level0_path,
-								m_parallax_path,
-								layer_tileset_paths,
-								group_names,
-								group_indices,
-								environment_layer_names,
-								collision_layer_names,
-								parallax_names,
-								parallax_speeds_x,
-								parallax_speeds_y);
+	skeleton_animation_frames = std::vector<unsigned int>{ SKELETON_ANIM_ATTACK_FRAMES,
+														 SKELETON_ANIM_DEATH_FRAMES,
+														 SKELETON_ANIM_HIT_FRAMES,
+														 SKELETON_ANIM_IDLE_FRAMES,
+														 SKELETON_ANIM_WALK_FRAMES
+													   };
 
-	m_player = new Player(GameState::inst(), "player/", "player/boy2.png", "Player");
-	m_platform = new Platform(GameState::inst(), "", "blocks/red_block.png", "Platform");
+	other_directories = std::vector<std::string>{
+												 m_parallax_path,
 
+												 tileset_collisiontile_path,
+												 tileset_forest_path,
+												 tileset_trees_path
+											   };
+
+	preLoadTextures(player_anim_directories);
+	preLoadTextures(skeleton_anim_directories);
+	preLoadTextures(other_directories);
+
+	m_levels.push_back(new Level(GameState::inst(),
+		"level0",
+		LEVEL0_MAP_WIDTH,
+		LEVEL0_MAP_HEIGHT,
+		m_level0_path,
+		m_parallax_path,
+		tileset_indices,
+		group_names,
+		group_indices,
+		layer_names,
+		parallax_names,
+		parallax_speeds_x,
+		parallax_speeds_y)
+	);
+
+	player_sounds_path = m_assets_path + m_sounds_path + "knight/";
+	player_textures_path = m_assets_path + m_textures_path + "knight/";
+
+	m_player = new Player(GameState::inst(),
+							player_sounds_path,
+							player_textures_path,
+						  player_animation_names,
+						  player_anim_directories, 
+						  player_animation_frames,
+						  10,
+						  120.0f,
+						  80.0f,
+						  0.0f, 0.0f,
+						  "Player1");
+
+	enemy_sounds_path = m_assets_path + m_sounds_path + "skeleton/";
+	enemy_textures_path = m_assets_path + m_textures_path + "skeleton/";
+	
+	m_enemies.push_back(new Enemy(GameState::inst(),
+									enemy_sounds_path,
+									enemy_textures_path,
+									skeleton_animation_names,
+									skeleton_anim_directories,
+									skeleton_animation_frames,
+									13,
+									120.0f, 80.0f,
+									150.0f, 0.0f,
+									"Enemy1")
+	);
+
+	Camera::inst()->setZoom(1.0f);
+
+	m_current_level = m_levels[0];
 	m_current_level->init();
 
 	m_player->init();
-	m_platform->init();
+	
+	for (int i = 0; i < m_enemies.size(); i++)
+	{
+		m_enemies[i]->init();
+	}
 }
 
 void GameState::draw()
 {
 	m_current_level->draw();
+	for (int i = 0; i < m_enemies.size(); i++)
+	{
+		m_enemies[i]->draw();
+	}
 	m_player->draw();
 }
 
 void GameState::preLoadTextures(const std::vector<std::string>& directories)
 {
+	// copy and remove slash
+	std::vector<std::string> dirs(directories.size());
 	for (int i = 0; i < directories.size(); i++)
 	{
-		graphics::preloadBitmaps(directories[i]);
+		dirs[i] = directories[i].substr(0, directories[i].length() - 1);
 	}
-}
 
-std::string GameState::getTexturesPath()
-{
-	return m_assets_path + m_textures_path;
+
+	for (int i = 0; i < dirs.size(); i++)
+	{
+		graphics::preloadBitmaps(dirs[i]);
+	}
 }
 
 std::string GameState::getSoundsPath()
@@ -250,19 +361,26 @@ std::string GameState::getWindowTitle()
 	return m_window_title;
 }
 
-void GameState::testCollisions()
+void GameState::checkCollisionsWithGround(Area & area)
 {
-	for (int i = 0; i < m_collision_group_dynamic.size(); i++)
+	m_current_level->checkCollisions(area);
+}
+
+void GameState::checkCollisionWithPlayer(Area& area)
+{
+	if (collide(*(m_player->m_hurt_box), area))
 	{
-		for (int j = 0; j < m_collision_group_all.size(); j++)
+		area.resolveCollision(*(m_player->m_hurt_box));
+	}
+}
+
+void GameState::checkCollisionsWithEnemies(Area& area)
+{
+	for (int i = 0; i < m_enemies.size(); i++)
+	{
+		if (collide(*(m_enemies[i]->m_hurt_box), area))
 		{
-			if (collide(m_collision_group_dynamic[i], m_collision_group_all[j]))
-			{
-				if (&m_collision_group_dynamic[i] != &m_collision_group_all[j])
-				{
-					m_collision_group_dynamic[i].resolveCollision(m_collision_group_all[j]);
-				}
-			}
+			area.resolveCollision(*(m_enemies[i]->m_hurt_box));
 		}
 	}
 }
@@ -277,20 +395,15 @@ void GameState::createTilesets(const std::vector<std::string>& tileset_paths,
 	}
 }
 
-void GameState::createLevels()
+bool GameState::collide(Area& a, Area& b)
 {
-
-}
-
-bool GameState::collide(Box& a, Box& b)
-{
-	m_min_right = std::min(a.m_right, b.m_right);
-	m_max_left = std::max(a.m_left, b.m_left);
+	m_min_right = std::min(a.getRight(), b.getRight());
+	m_max_left = std::max(a.getLeft(), b.getLeft());
 
 	if (m_max_left > m_min_right) return false;
 
-	m_min_bottom = std::min(a.m_bottom, b.m_bottom);
-	m_max_top = std::max(a.m_top, b.m_top);
+	m_min_bottom = std::min(a.getBottom(), b.getBottom());
+	m_max_top = std::max(a.getTop(), b.getTop());
 
 	if (m_max_top > m_min_bottom) return false;
 

@@ -23,17 +23,17 @@
 #define PARALLAX_WIDTH 512
 #define PARALLAX_HEIGHT 320
 
-#define PARALLAX_NAME_0					"BGFront"
-#define PARALLAX_NAME_0_SPEED_X			0.85f
+#define PARALLAX_NAME_0					"CloudsBack"
+#define PARALLAX_NAME_0_SPEED_X			0.25f
 #define PARALLAX_NAME_0_SPEED_Y			1.0f
-#define PARALLAX_NAME_1					"BGBack"
-#define PARALLAX_NAME_1_SPEED_X			0.75f	
+#define PARALLAX_NAME_1					"CloudsFront"
+#define PARALLAX_NAME_1_SPEED_X			0.5f
 #define PARALLAX_NAME_1_SPEED_Y			1.0f
-#define PARALLAX_NAME_2					"CloudsFront"
-#define PARALLAX_NAME_2_SPEED_X			0.5f
+#define PARALLAX_NAME_2					"BGBack"
+#define PARALLAX_NAME_2_SPEED_X			0.75f	
 #define PARALLAX_NAME_2_SPEED_Y			1.0f
-#define PARALLAX_NAME_3					"CloudsBack"
-#define PARALLAX_NAME_3_SPEED_X			0.25f
+#define PARALLAX_NAME_3					"BGFront"
+#define PARALLAX_NAME_3_SPEED_X			0.85f
 #define PARALLAX_NAME_3_SPEED_Y			1.0f
 
 // Layers

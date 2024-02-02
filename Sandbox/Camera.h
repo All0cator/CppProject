@@ -1,5 +1,5 @@
 #pragma once
-/* Singleton class */
+
 class Camera
 {
 private:
@@ -21,9 +21,15 @@ public:
 
 	void setBounds(float min_x, float max_x, float min_y, float max_y);
 	void setZoom(float zoom);
+	void setFocalPointX(float focal_point_x);
+	void setFocalPointY(float focal_point_y);
 	float getFocalPointX();
 	float getFocalPointY();
 	float getZoom();
+	float getMinX();
+	float getMaxX();
+	float getMinY();
+	float getMaxY();
 	~Camera();
 private:
 	Camera();

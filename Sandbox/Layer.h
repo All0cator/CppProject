@@ -16,14 +16,15 @@ private:
 	std::vector<int> m_map;
 
 	graphics::Brush m_tile_brush;
+	graphics::Brush m_debug_brush;
 
 public:
 	Layer(GameState* gs,
-		  const std::string& name = "",
+		  const std::string& name,
 		  Tileset * tileset,
 		  int width,
 		  int height,
-		  const std::vector<int>& map);
+		  const std::vector<int> map);
 	virtual ~Layer();
 	virtual void update(float dt) override;
 	virtual void init() override;

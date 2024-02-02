@@ -9,6 +9,6 @@ public:
 	Frame* m_frames;
 
 public:
-	Animation(unsigned int num_frames);
+	Animation(unsigned int num_frames, const std::string& path_to_animation);
 	virtual ~Animation();
 };

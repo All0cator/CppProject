@@ -21,13 +21,13 @@ void draw()
 int main()
 {
 	
-	init();
 	graphics::createWindow(GameState::inst()->getWindowWidth(), GameState::inst()->getWindowHeight(), GameState::inst()->getWindowTitle());
 	graphics::setDrawFunction(draw);
 	graphics::setUpdateFunction(update);
 
 	graphics::setCanvasSize(GameState::inst()->getCanvasWidth(), GameState::inst()->getCanvasHeight());
 	graphics::setCanvasScaleMode(graphics::CANVAS_SCALE_FIT);
+	init();
 
 	graphics::startMessageLoop();
 	

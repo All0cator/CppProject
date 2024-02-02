@@ -2,17 +2,22 @@
 
 #define SETCOLOR(c, r, g, b) {c[0]=r; c[1]=g; c[2]=b;}
 
+#define LEVEL0_MAP_WIDTH 50
+#define LEVEL0_MAP_HEIGHT 20
 
 // In Pixels
 #define TILE_WIDTH 16
 #define TILE_HEIGHT 16
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 400
+#define WINDOW_HEIGHT 312
 
 // In Canvas Units
-#define CANVAS_WIDTH 10.0f
-#define CANVAS_HEIGHT 10.0f
+#define CANVAS_WIDTH 400.0f
+#define CANVAS_HEIGHT 312.0f
 
 // Not graphics constants :D
+
+#define TILE_SPIKE 0
+#define TILE_SOLID_TILE 1 
 
 #define SPIKE_DMG 30.0f

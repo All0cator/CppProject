@@ -16,6 +16,8 @@ Timer::Timer(float timeout,
 	{
 		m_timeout_in_milliseconds = timeout;
 	}
+
+	Start();
 }
 
 Timer::~Timer()
@@ -57,7 +59,6 @@ void Timer::Stop()
 	if (m_looping)
 	{
 		Reset(0.0f, true);
-		Start();
 		return;
 	}
 
@@ -69,7 +70,9 @@ void Timer::Reset(float new_timeout,
 				  std::function<void()> new_timeout_function,
 				  TimeUnit unit)
 {
-	m_is_stopped = looping;
+	m_is_stopped = false;
+
+	m_looping = looping;
 
 	if (new_timeout_function != nullptr)
 	{
@@ -85,6 +88,8 @@ void Timer::Reset(float new_timeout,
 			m_timeout_in_milliseconds *= 1000.0f;
 		}
 	}
+
+	Start();
 }
 
 bool Timer::IsRunning()
@@ -100,6 +105,6 @@ float Timer::GetAccumulatedTime(TimeUnit unit)
 	}
 	else
 	{
-		return m_accumulated_time_in_milliseconds * 1000.0f;
+		return m_accumulated_time_in_milliseconds / 1000.0f;
 	}
 }

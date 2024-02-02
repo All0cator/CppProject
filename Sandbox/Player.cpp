@@ -5,11 +5,13 @@
 #include "Timer.h"
 #include "Enemy.h"
 #include "Area.h"
+#include "Camera.h"
 
 Player::Player(GameState* gs,
 			   const std::string& sounds_path,
 			   const std::string& textures_path,
 			   const std::vector<std::string>& animation_names,
+			   const std::vector<std::string>& animation_directories,
 			   const std::vector<unsigned int>& frames_per_animation,
 			   float animation_speed_FPS,
 			   float width_pixels,
@@ -17,19 +19,106 @@ Player::Player(GameState* gs,
 			   float left_pixels,
 			   float top_pixels,
 			   const std::string& name,
-			   float R = 1.0f,
-			   float G = 0.0f,
-			   float B = 0.0f)
+			   float R,
+			   float G,
+			   float B)
 	: GameObject(gs, name),
-	  Actor(animation_names, frames_per_animation, animation_speed_FPS),
-	  Box(width_pixels, height_pixels, left_pixels, top_pixels, Type::DYNAMIC, SubType::PLAYER, R, G, B)
+	  Actor(animation_names, animation_directories, frames_per_animation, animation_speed_FPS),
+	  Box(width_pixels, height_pixels, left_pixels, top_pixels, R, G, B)
 {
-	m_full_textures_path = m_state->inst()->getTexturesPath() + textures_path;
-	m_full_sounds_path = m_state->inst()->getSoundsPath() + sounds_path;
+	m_sounds_path = sounds_path;
+	m_textures_path = textures_path;
 
-	m_ground_collider = new Area(width_pixels, height_pixels, left_pixels, top_pixels, , SubType::RECTANGLE);
+	this->m_texture_width = width_pixels;
+	this->m_texture_half_width = width_pixels / 2.0f;
+	this->m_texture_height = height_pixels;
+	this->m_texture_half_height = height_pixels / 2.0f;
+
+	m_ground_collider = new Area(21.0f, 16.0f, left_pixels + 44.0f, top_pixels + 64.0f, std::bind(&Player::ground_collider_callback, this, std::placeholders::_1), Area::AreaType::COLLIDER, Area::OriginType::PLAYER, this);
+	m_hurt_box = new Area(21.0f, 38.0f, left_pixels + 44.0f, top_pixels + 42.0f, std::bind(&Player::hurt_box_callback, this, std::placeholders::_1), Area::AreaType::HURTBOX, Area::OriginType::PLAYER, this);
+	m_hit_box = new Area(66.0f, 43.0f, left_pixels + 51.0f, top_pixels + 37.0f, std::bind(&Player::hit_box_callback, this, std::placeholders::_1), Area::AreaType::HITBOX, Area::OriginType::PLAYER, this);
+	m_hit_box->m_is_active = false;
 	m_jump_timer = new Timer(1.0f);
 	m_invincibility_timer = new Timer(1.0f);
+}
+
+void Player::ground_collider_callback(Area& other)
+{
+	switch (other.m_type)
+	{
+	case Area::AreaType::TILE:
+		switch (other.m_origin)
+		{
+		case Area::OriginType::LEVEL:
+			m_is_grounded = true;
+			break;
+		}
+		break;
+	case Area::AreaType::SPIKE:
+		switch (other.m_origin)
+		{
+		case Area::OriginType::LEVEL:
+			m_is_grounded = true;
+			break;
+		}
+		break;
+	}
+}
+
+void Player::hurt_box_callback(Area& other)
+{
+	switch (other.m_type)
+	{
+	case Area::AreaType::TILE:
+		
+		switch (other.m_origin)
+		{
+		case Area::OriginType::LEVEL:
+			correctPos(other);
+			break;
+		}
+		
+		break;
+	case Area::AreaType::SPIKE:
+
+		switch (other.m_origin)
+		{
+		case Area::OriginType::LEVEL:
+			takeDmg(SPIKE_DMG);
+			correctPos(other);
+			break;
+		}
+
+		break;
+	case Area::AreaType::HITBOX:
+
+		switch (other.m_origin)
+		{
+		case Area::OriginType::ENEMY:
+			takeDmg(static_cast<Enemy&>(*(other.m_origin_ptr)).getDmg());
+			break;
+		}
+
+		break;
+	}
+}
+
+
+void Player::hit_box_callback(Area& other)
+{
+	switch (other.m_type)
+	{
+	case Area::AreaType::HITBOX:
+
+		switch (other.m_origin)
+		{
+		case Area::OriginType::ENEMY:
+			static_cast<Enemy&>(*(other.m_origin_ptr)).takeDmg(m_dmg);
+			break;
+		}
+
+		break;
+	}
 }
 
 void Player::update(float dt) 
@@ -44,8 +133,13 @@ void Player::update(float dt)
 	updateAnimation();
 	updateTimers(dt);
 	updateMovement(dt);
+	updateAreaDimensions(); // called before checking for collisions as we first move everything then check for collisions
+	checkCollisions();
+	updateAreaDimensions(); // we might have moved so to technically be correct we need to update again our areas
 
-
+	
+	//graphics::drawText(graphics::windowToCanvasX(this->getLeft()), graphics::windowToCanvasY(this->getRight()),  16.0f, "Player State: " + std::to_string(m_movement_state) + m_current_animation_name + std::to_string(m_current_frame_index) + "  " + std::to_string(m_frame_timer->GetAccumulatedTime()), m_debug_text);
+	graphics::drawText(graphics::windowToCanvasX(this->getLeft()), graphics::windowToCanvasY(this->getRight()), 16.0f, "Player Coords (" + std::to_string(getLeft()) + ", " + std::to_string(getTop()) + ")" + std::to_string(graphics::windowToCanvasX(512.0f, false)), m_debug_text);
 	GameObject::update(dt);
 }
 
@@ -124,11 +218,13 @@ void Player::updateState()
 		m_movement_state = State::HIT;
 		return;
 	}
+	m_hit_box->m_is_active = false;
 
 	// Dead frames
 	if (m_movement_state == State::TRANSITION_FALL && !m_animation_end) return;
 	if (m_movement_state == State::TRANSITION_CROUCH && !m_animation_end) return;
-	if (m_is_attacking && !m_animation_end) return;
+	if (m_is_attacking && !m_animation_end) { m_hit_box->m_is_active = true; return; }
+
 
 	if (m_is_turning_arround)
 	{
@@ -219,12 +315,14 @@ void Player::updateAnimation()
 			if (m_animation_end)
 			{
 				m_orientation_x *= -1;
+				flipAreasX();
 				m_is_turning_arround = false;
 			}
 		}
 		else
 		{
 			m_orientation_x *= -1;
+			flipAreasX();
 			m_is_turning_arround = false;
 		}
 		
@@ -316,21 +414,59 @@ void Player::updateMovement(float dt)
 	}
 
 
-	m_pos_x += m_velocity_x * m_direction_x * dt;
-	m_pos_y += m_velocity_y * m_direction_y * dt;
+	setLeft(getLeft() + m_velocity_x * m_direction_x * dt);
+	setTop(getTop() + m_velocity_y * m_direction_y * dt);
+
+	Camera::inst()->setFocalPointX(getLeft());
+	Camera::inst()->setFocalPointY(getTop());
+
 	// updating velocity for x makes movement slippery
 	m_velocity_y += m_acceleration_y * dt;
+
+	if (m_velocity_y > m_max_velocity_y)
+	{
+		m_velocity_y = m_max_velocity_y;
+	}
+	else if (m_velocity_y < -m_max_velocity_y)
+	{
+		m_velocity_y = -m_max_velocity_y;
+	}
+}
+
+void Player::updateAreaDimensions()
+{
+	m_new_x_axis = (this->getLeft() + this->getRight()) / 2.0f;
+
+	m_ground_collider->updatePositions(this->getLeft() + 44.0f, this->getTop() + 64.0f, m_new_x_axis);
+	m_hurt_box->updatePositions(this->getLeft() + 44.0f, this->getTop() + 42.0f, m_new_x_axis);
+	m_hit_box->updatePositions(this->getLeft() + 51.0f, this->getTop() + 37.0f, m_new_x_axis);
+}
+
+void Player::checkCollisions()
+{
+	m_state->checkCollisionsWithEnemies(*m_hit_box);
+	m_state->checkCollisionsWithEnemies(*m_hurt_box);
+	m_state->checkCollisionsWithGround(*m_ground_collider);
+}
+
+void Player::flipAreasX()
+{
+	m_ground_collider->flipX();
+	m_hurt_box->flipX();
+	m_hit_box->flipX();
 }
 
 void Player::init() 
 {
+	graphics::setFont("assets/orange juice 2.0.ttf");
+	SETCOLOR(m_debug_text.fill_color, 1.0f, 1.0f, 1.0f);
+	m_debug_text.fill_opacity = 1.0f;
+
 	m_movement_state = State::GROUND;
 	m_previous_movement_state = State::GROUND;
 
-	m_texture_size_width = 120;
-	m_texture_size_height = 80;
-	m_scale_x = 0.25f;
-	m_scale_y = 0.25f;
+	//m_scale_x = 0.25f;
+	//m_scale_y = 0.25f;
 
 	m_base_hp = 100.0f;
 	m_base_dmg = 50.0f;
@@ -338,14 +474,15 @@ void Player::init()
 	m_hp = m_base_hp;
 	m_dmg = m_base_dmg;
 
-	m_orientation_x = 1.0f;
-	m_orientation_y = 0.0f;
+	m_orientation_x = 1;
+	m_orientation_y = 1;
 	m_direction_x = 0.0f;
+	m_direction_y = 0.0f;
 
 	m_velocity_x = 5.0f;
-	m_velocity_y = 5.0f;
-	m_acceleration_y = 6.0f;
+	m_acceleration_y = 200.0f;
 	m_velocity_y = m_acceleration_y;
+	m_max_velocity_y = 0.0f;
 
 	m_is_moving = false;
 	m_is_jumping = false;
@@ -358,25 +495,11 @@ void Player::init()
 	m_is_turning_arround = false;
 	m_is_flickering = false;
 
-	float canvas_width = GameObject::m_state->inst()->getCanvasWidth();
-	float canvas_height = GameObject::m_state->inst()->getCanvasHeight();
-	int window_width = GameObject::m_state->inst()->getWindowWidth();
-	int window_height = GameObject::m_state->inst()->getWindowHeight();
-
-	m_pos_x = canvas_width / 2.0f + m_translation_x;
-	m_pos_y = canvas_height / 2.0f + m_translation_y;
-
-	m_size_width = (float)m_texture_size_width / window_width *
-		canvas_width * m_scale_x;
-	m_size_height = (float)m_texture_size_height / window_height *
-		canvas_height * m_scale_y;
-
 	SETCOLOR(m_brush.fill_color, 1.0f, 1.0f, 1.0f);
 	m_brush.fill_opacity = 1.0f;
 	m_brush.outline_opacity = 0.0f;
-	m_brush.texture = m_full_textures_path;
+	m_brush.texture = "assets\\textures\\knight\\Idle\\0.png";//m_textures_path + KNIGHT_ANIM_IDLE + "/0.png";
 
-	m_ground_collider->updatePositions(m_pos_x, m_pos_y, m_pos_x + m_width_pixels / 2.0f);
 	m_jump_timer->Reset();
 	m_invincibility_timer->Reset();
 
@@ -396,11 +519,48 @@ void Player::draw()
 
 	graphics::setScale((float)m_orientation_x, 1.0f);
 
-	graphics::drawRect(m_pos_x, m_pos_y,
-		m_size_width, m_size_height,
-		m_brush);
+	graphics::drawRect(graphics::windowToCanvasX(getLeft() + m_texture_half_width, false), 
+					   graphics::windowToCanvasY(getTop() + m_texture_half_height, false),
+					   graphics::windowToCanvasX(m_texture_width, false), 
+					   graphics::windowToCanvasY(m_texture_height, false),
+					   m_brush);
 
 	graphics::resetPose();
+
+	if (m_state->m_is_debug_mode)
+	{
+		// Draw the Areas also
+
+		// Player Texture Box
+		graphics::drawRect(graphics::windowToCanvasX(getLeft() + m_texture_half_width, false),
+							graphics::windowToCanvasY(getTop() + m_texture_half_height, false),
+							graphics::windowToCanvasX(m_texture_width, false),
+							graphics::windowToCanvasY(m_texture_height, false),
+							m_debug_box_brush);
+
+
+		// Ground Collider
+		graphics::drawRect(graphics::windowToCanvasX(m_ground_collider->getLeft() + m_ground_collider->m_half_width_pixels, false),
+							graphics::windowToCanvasY(m_ground_collider->getTop() + m_ground_collider->m_half_height_pixels, false),
+							graphics::windowToCanvasX(m_ground_collider->m_width_pixels, false),
+							graphics::windowToCanvasY(m_ground_collider->m_height_pixels, false),
+							m_ground_collider->m_debug_box_brush);
+
+
+		// Hurt Box
+		graphics::drawRect(graphics::windowToCanvasX(m_hurt_box->getLeft() + m_hurt_box->m_half_width_pixels, false),
+							graphics::windowToCanvasY(m_hurt_box->getTop() + m_hurt_box->m_half_height_pixels, false),
+							graphics::windowToCanvasX(m_hurt_box->m_width_pixels, false),
+							graphics::windowToCanvasY(m_hurt_box->m_height_pixels, false),
+							m_hurt_box->m_debug_box_brush);
+
+		// Hit Box
+		graphics::drawRect(graphics::windowToCanvasX(m_hit_box->getLeft() + m_hit_box->m_half_width_pixels, false),
+							graphics::windowToCanvasY(m_hit_box->getTop() + m_hit_box->m_half_height_pixels, false),
+							graphics::windowToCanvasX(m_hit_box->m_width_pixels, false),
+							graphics::windowToCanvasY(m_hit_box->m_height_pixels, false),
+							m_hit_box->m_debug_box_brush);
+	}
 
 	GameObject::draw();
 }
@@ -408,6 +568,8 @@ void Player::draw()
 Player::~Player() 
 {
 	delete m_ground_collider;
+	delete m_hurt_box;
+	delete m_hit_box;
 	delete m_jump_timer;
 	delete m_invincibility_timer;
 }
@@ -424,59 +586,15 @@ void Player::takeDmg(float ammount)
 	}
 }
 
-void Player::correctPos(Box & other)
+void Player::correctPos(Area & other)
 {
-	m_pos_x -= m_orientation_x * GameObject::m_state->inst()->m_correction_x;
-	m_pos_y -= m_orientation_y * GameObject::m_state->inst()->m_correction_y;
+	setLeft(getLeft() - m_orientation_x * GameObject::m_state->inst()->m_correction_x);
+	setTop(getTop() - m_orientation_y * GameObject::m_state->inst()->m_correction_y);
 
 	m_is_grounded = true;
 }
 
-
-void Player::collidedWithGround(Box& other)
-{
-	if (other.m_type == Type::STATIC)
-	{
-		m_is_jumping = false;
-	}
-}
-
-
 float Player::getDmg()
 {
 	return m_dmg;
-}
-
-
-void Player::resolveCollision(Box& other)
-{
-	switch (other.m_type)
-	{
-	case Type::STATIC:
-
-		switch (other.m_sub_type)
-		{
-		case SubType::TILE:
-			correctPos(other);
-			break;
-		case SubType::SPIKE:
-			takeDmg(SPIKE_DMG);
-			correctPos(other);
-			break;
-		}
-
-		break;
-	case Type::DYNAMIC:
-
-		switch (other.m_sub_type)
-		{
-		case SubType::ENEMY:
-			takeDmg(static_cast<Enemy&>(other).getDmg());
-			break;
-		case SubType::PLAYER:
-			break;
-		}
-
-		break;
-	}
 }

@@ -3,18 +3,17 @@
 #include <iostream>
 #include "GameObject.h"
 
-Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_pixels, Type type, SubType sub_type)
+Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_pixels)
 {
 	if (width_pixels <= 0.0f || height_pixels <= 0.0f)
 	{
 		std::cout << "Error: Negative width and height gived to Box: (W) : " << width_pixels << " (H) : " << height_pixels << std::endl;
 	}
 
-	this->m_type = type;
-	this->m_sub_type = sub_type;
-
 	this->m_width_pixels = width_pixels;
+	this->m_half_width_pixels = width_pixels / 2.0f;
 	this->m_height_pixels = height_pixels;
+	this->m_half_height_pixels = height_pixels / 2.0f;
 
 	this->m_top = left_pixels;
 	this->m_left= top_pixels;
@@ -24,8 +23,8 @@ Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_p
 	setOutlineParameters(1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
 }
 
-Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_pixels, Type type, SubType sub_type, float R, float G, float B)
-	: Box(width_pixels, height_pixels, left_pixels, top_pixels, type, sub_type)
+Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_pixels, float R, float G, float B)
+	: Box(width_pixels, height_pixels, left_pixels, top_pixels)
 {
 	// Todo
 	// First we need to clamp values to a valid range what this means is
@@ -82,10 +81,62 @@ Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_p
 Box::~Box()
 {}
 
+void Box::setLeftTop(float new_left, float new_top)
+{
+	setLeft(new_left);
+	setTop(new_top);
+}
+
+void Box::setLeft(float new_left)
+{
+	m_left = new_left;
+	m_right = m_left + m_width_pixels;
+}
+
+void Box::setTop(float new_top)
+{
+	m_top = new_top;
+	m_bottom = m_top + m_height_pixels;
+}
+
+void Box::setBottom(float new_bottom)
+{
+	m_bottom = new_bottom;
+	m_top = m_bottom - m_height_pixels;
+}
+
+void Box::setRight(float new_right)
+{
+	m_right = new_right;
+	m_left = m_right - m_width_pixels;
+}
+
+
+
+float Box::getLeft()
+{
+	return m_left;
+}
+
+float Box::getTop()
+{
+	return m_top;
+}
+
+float Box::getBottom()
+{
+	return m_bottom;
+}
+float Box::getRight()
+{
+	return m_right;
+}
+
 void Box::setOutlineParameters(float R, float G, float B, float opacity, float width)
 {
 	SETCOLOR(this->m_debug_box_brush.outline_color, R, G, B);
+	this->m_debug_box_brush.fill_opacity = 0.0f;
 	this->m_debug_box_brush.outline_opacity = opacity;
-	this->m_debug_box_brush.outline_width = width; 
+	this->m_debug_box_brush.outline_width = width;
 }
 
