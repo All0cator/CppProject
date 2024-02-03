@@ -454,8 +454,8 @@ void Player::updateMovement(float dt)
 	setLeft(getLeft() + m_velocity_x * m_direction_x * dt);
 	setTop(getTop() + m_velocity_y * m_direction_y * dt);
 
-	Camera::inst()->setFocalPointX(getLeft());
-	Camera::inst()->setFocalPointY(getTop());
+	Camera::inst()->setFocalPointX(getLeft() + m_texture_half_width);
+	Camera::inst()->setFocalPointY(getTop() + m_texture_half_height);
 
 	// updating velocity for x makes movement slippery
 	m_velocity_y += m_acceleration_y * dt;
@@ -566,8 +566,8 @@ void Player::draw()
 
 	graphics::setScale((float)m_orientation_x, 1.0f);
 
-	graphics::drawRect(graphics::windowToCanvasX(getLeft() - Camera::inst()->getFocalPointX() + WINDOW_WIDTH / 2.0f, false),
-					   graphics::windowToCanvasY(getTop() - Camera::inst()->getFocalPointY() + WINDOW_HEIGHT / 2.0f, false),
+	graphics::drawRect(graphics::windowToCanvasX(getLeft() - Camera::inst()->getFocalPointX() + m_texture_half_width, false),
+					   graphics::windowToCanvasY(getTop() - Camera::inst()->getFocalPointY() + m_texture_half_height, false),
 					   graphics::windowToCanvasX(m_texture_width, false), 
 					   graphics::windowToCanvasY(m_texture_height, false),
 					   m_brush);
@@ -579,31 +579,31 @@ void Player::draw()
 	if (m_state->m_is_debug_mode)
 	{
 		// Player Texture Box
-		graphics::drawRect(graphics::windowToCanvasX(getLeft() - Camera::inst()->getFocalPointX() + WINDOW_WIDTH / 2.0f, false),
-							graphics::windowToCanvasY(getTop() - Camera::inst()->getFocalPointY() + WINDOW_HEIGHT / 2.0f, false),
+		graphics::drawRect(graphics::windowToCanvasX(getLeft() - Camera::inst()->getFocalPointX() + m_texture_half_width, false),
+							graphics::windowToCanvasY(getTop() - Camera::inst()->getFocalPointY() + m_texture_half_height, false),
 							graphics::windowToCanvasX(m_texture_width, false),
 							graphics::windowToCanvasY(m_texture_height, false),
 							m_debug_box_brush);
 
 
 		// Ground Collider
-		graphics::drawRect(graphics::windowToCanvasX(m_ground_collider->getLeft() - Camera::inst()->getFocalPointX() + WINDOW_WIDTH / 2.0f - this->m_texture_half_width + m_ground_collider->m_half_width_pixels, false),
-							graphics::windowToCanvasY(m_ground_collider->getTop() - Camera::inst()->getFocalPointY() + WINDOW_HEIGHT / 2.0f - this->m_texture_half_height + m_ground_collider->m_half_height_pixels, false),
+		graphics::drawRect(graphics::windowToCanvasX(m_ground_collider->getLeft() - Camera::inst()->getFocalPointX() + m_ground_collider->m_half_width_pixels, false),
+							graphics::windowToCanvasY(m_ground_collider->getTop() - Camera::inst()->getFocalPointY() + m_ground_collider->m_half_height_pixels, false),
 							graphics::windowToCanvasX(m_ground_collider->m_width_pixels, false),
 							graphics::windowToCanvasY(m_ground_collider->m_height_pixels, false),
 							m_ground_collider->m_debug_box_brush);
 
 
 		// Hurt Box
-		graphics::drawRect(graphics::windowToCanvasX(m_hurt_box->getLeft() - Camera::inst()->getFocalPointX() + WINDOW_WIDTH / 2.0f - this->m_texture_half_width + m_hurt_box->m_half_width_pixels, false),
-							graphics::windowToCanvasY(m_hurt_box->getTop() - Camera::inst()->getFocalPointY() + WINDOW_HEIGHT / 2.0f - this->m_texture_half_height + m_hurt_box->m_half_height_pixels, false),
+		graphics::drawRect(graphics::windowToCanvasX(m_hurt_box->getLeft() - Camera::inst()->getFocalPointX() + m_hurt_box->m_half_width_pixels, false),
+							graphics::windowToCanvasY(m_hurt_box->getTop() - Camera::inst()->getFocalPointY() + m_hurt_box->m_half_height_pixels, false),
 							graphics::windowToCanvasX(m_hurt_box->m_width_pixels, false),
 							graphics::windowToCanvasY(m_hurt_box->m_height_pixels, false),
 							m_hurt_box->m_debug_box_brush);
 
 		// Hit Box
-		graphics::drawRect(graphics::windowToCanvasX(m_hit_box->getLeft() - Camera::inst()->getFocalPointX() + WINDOW_WIDTH / 2.0f - this->m_texture_half_width + m_hit_box->m_half_width_pixels, false),
-							graphics::windowToCanvasY(m_hit_box->getTop() - Camera::inst()->getFocalPointY() + WINDOW_HEIGHT / 2.0f - this->m_texture_half_height + m_hit_box->m_half_height_pixels, false),
+		graphics::drawRect(graphics::windowToCanvasX(m_hit_box->getLeft() - Camera::inst()->getFocalPointX() + m_hit_box->m_half_width_pixels, false),
+							graphics::windowToCanvasY(m_hit_box->getTop() - Camera::inst()->getFocalPointY() + m_hit_box->m_half_height_pixels, false),
 							graphics::windowToCanvasX(m_hit_box->m_width_pixels, false),
 							graphics::windowToCanvasY(m_hit_box->m_height_pixels, false),
 							m_hit_box->m_debug_box_brush);

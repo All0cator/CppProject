@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "GraphicsConstants.h"
 
 Camera* Camera::m_instance = nullptr;
 
@@ -27,12 +28,13 @@ void Camera::setZoom(float zoom)
 
 void Camera::setFocalPointX(float focal_point_x)
 {
-	this->m_focal_point_x = focal_point_x;
+	this->m_focal_point_x = focal_point_x - WINDOW_WIDTH / 2.0f;
+
 }
 
 void Camera::setFocalPointY(float focal_point_y)
 {
-	this->m_focal_point_y = focal_point_y;
+	this->m_focal_point_y = focal_point_y - WINDOW_HEIGHT / 2.0f;
 }
 
 Camera::~Camera()
