@@ -15,8 +15,8 @@ Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_p
 	this->m_height_pixels = height_pixels;
 	this->m_half_height_pixels = height_pixels / 2.0f;
 
-	this->m_top = left_pixels;
-	this->m_left= top_pixels;
+	this->m_top = top_pixels;
+	this->m_left= left_pixels;
 	this->m_right = left_pixels + width_pixels;
 	this->m_bottom = top_pixels + height_pixels;
 

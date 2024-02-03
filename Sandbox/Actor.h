@@ -16,6 +16,7 @@ protected:
 	std::vector<Animation *> m_animations;
 	Animation* m_current_animation;
 	std::string m_current_animation_name;
+	bool m_has_animation_end;
 	unsigned int m_current_frame_index;
 	Timer* m_frame_timer;
 	float m_time_per_frame_seconds;

@@ -32,6 +32,7 @@ public:
 private:
 	Timer* m_jump_timer;
 	Timer* m_invincibility_timer;
+	Timer* m_attack_timer;
 
 	float m_base_hp;
 	float m_base_dmg;

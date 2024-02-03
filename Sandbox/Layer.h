@@ -24,7 +24,7 @@ public:
 		  Tileset * tileset,
 		  int width,
 		  int height,
-		  const std::vector<int> map);
+		  const std::vector<int>& map);
 	virtual ~Layer();
 	virtual void update(float dt) override;
 	virtual void init() override;

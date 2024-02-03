@@ -66,7 +66,7 @@ void GameState::update(float dt)
 			m_toggle_timer->Reset();
 		}
 	}
-
+	m_toggle_timer->Update(deltaTime);
 
 	m_current_level->update(deltaTime);
 	m_player->update(deltaTime);
@@ -94,20 +94,22 @@ void GameState::init()
 	m_level0_path = m_levels_path + "level0/";
 		
 	group_names  = std::vector<std::string>{ GROUP_NAME_ENVIRONMENT, GROUP_NAME_COLLISION};
-	group_indices = std::vector<int>{ 1, 1,
+	group_indices = std::vector<int>{ 0, 0,
 									 0, 0,
 									 0, 0,
 									 0, 0,
-									 0, 0,
-									 0 };
+									 0, 1,
+									 1 };
 
-	layer_names  = std::vector<std::string>{ LAYERS_COLLISION_SOLIDTILES, LAYERS_COLLISION_SPIKES,
-											  LAYERS_ENVIRONMENT_SPIKES, LAYERS_ENVIRONMENT_BRIDGES,
-											  LAYERS_ENVIRONMENT_FENCES, LAYERS_ENVIRONMENT_GRASS,
-											  LAYERS_ENVIRONMENT_BUSHES, LAYERS_ENVIRONMENT_BIGTREES,
-											  LAYERS_ENVIRONMENT_SMALLTREES, LAYERS_ENVIRONMENT_ROCKSFORE,
-											  LAYERS_ENVIRONMENT_ROCKSBACK };
-
+	layer_names = std::vector<std::string>{ LAYERS_ENVIRONMENT_ROCKSBACK, LAYERS_ENVIRONMENT_ROCKSFORE,
+											  LAYERS_ENVIRONMENT_SMALLTREES, LAYERS_ENVIRONMENT_BIGTREES,
+											LAYERS_ENVIRONMENT_BUSHES, LAYERS_ENVIRONMENT_GRASS,
+											LAYERS_ENVIRONMENT_FENCES, LAYERS_ENVIRONMENT_BRIDGES,
+											LAYERS_ENVIRONMENT_SPIKES, LAYERS_COLLISION_SPIKES,
+											LAYERS_COLLISION_SOLIDTILES
+											   };
+											  
+										  
 	m_tilesets_path = m_assets_path + m_textures_path + "tiles/";
 
 	tileset_paths = std::vector<std::string>{ m_tilesets_path + TILESET_FOREST + "/",
@@ -121,12 +123,12 @@ void GameState::init()
 	tileset_forest_path = m_tilesets_path + "forest/";
 	tileset_trees_path = m_tilesets_path + "trees/";
 
-	tileset_indices = std::vector<int>{ 2, 2,
+	tileset_indices = std::vector<int>{ 0, 0,
+									   1, 1,
 									   0, 0,
-									   0, 0,
-									   0, 1, 
-									   1, 0,
-									   0 };
+									   0, 0, 
+									   0, 2,
+									   2 };
 	
 	m_parallax_path = m_assets_path + m_textures_path + "parallax/";
 
@@ -406,6 +408,9 @@ bool GameState::collide(Area& a, Area& b)
 	m_max_top = std::max(a.getTop(), b.getTop());
 
 	if (m_max_top > m_min_bottom) return false;
+
+	m_correction_x = m_min_right - m_max_left;
+	m_correction_y = m_min_bottom - m_max_top;
 
 	return true;
 }

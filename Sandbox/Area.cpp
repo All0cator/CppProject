@@ -19,14 +19,7 @@ Area::Area(float width_pixels, float height_pixels,
 
 void Area::flipX()
 {
-	if (getLeft() > m_x_axis)
-	{
-		setLeft(getLeft() - (getLeft() - m_x_axis) - m_width_pixels);
-	}
-	else
-	{
-		setLeft(getLeft() + (m_x_axis - getLeft()) + m_width_pixels);
-	}
+	setLeft(getLeft() + (m_x_axis - getLeft()) + (m_x_axis - getRight()));
 }
 
 void Area::updatePositions(float new_left, float new_top, float new_x_axis)

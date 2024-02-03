@@ -52,6 +52,11 @@ Level::~Level()
 	{
 		delete m_environment_layers[i];
 	}
+
+	for (int i = 0; i < m_solid_tile_areas.size(); i++)
+	{
+		delete m_solid_tile_areas[i];
+	}
 }
 
 void Level::update(float dt)
@@ -68,7 +73,7 @@ void Level::update(float dt)
 
 	GameObject::update(dt);
 }
-
+#include <iostream>
 void Level::init()
 {
 	Camera::inst()->setBounds(0.0f, (float)(m_level_map_width * TILE_WIDTH), 0.0f, (float)(m_level_map_height * TILE_HEIGHT));
@@ -97,7 +102,7 @@ void Level::init()
 	for (int i = 0; i < m_layer_names.size(); i++)
 	{
 		info = CSVParse::parseInts(m_level_path + m_name + "._" + m_group_names[m_group_indices[i]] + "_" + m_layer_names[i], ',');
-
+		std::cout << info.width << " " << info.height << std::endl;
 		group_name = m_group_names[m_group_indices[i]];
 
 		if (group_name == GROUP_NAME_ENVIRONMENT)
@@ -127,6 +132,8 @@ void Level::init()
 															  (float)(x * TILE_WIDTH), (float)(y * TILE_HEIGHT),
 															  nullptr,
 															  Area::AreaType::SPIKE, Area::OriginType::LEVEL, this));
+
+						SETCOLOR(m_solid_tile_areas[m_solid_tile_areas.size() - 1]->m_debug_box_brush.fill_color, 1.0f, 0.0f, 0.0f);
 					}
 					else if (info.int_array[index] == TILE_SOLID_TILE)
 					{
@@ -134,6 +141,8 @@ void Level::init()
 															  (float)(x * TILE_WIDTH), (float)(y * TILE_HEIGHT),
 															  nullptr,
 															  Area::AreaType::TILE, Area::OriginType::LEVEL, this));
+
+						SETCOLOR(m_solid_tile_areas[m_solid_tile_areas.size() - 1]->m_debug_box_brush.fill_color, 0.0f, 1.0f, 1.0f);
 					}
 				}
 			}
@@ -153,6 +162,22 @@ void Level::draw()
 	for (int i = 0; i < m_environment_layers.size(); i++)
 	{
 		m_environment_layers[i]->draw();
+	}
+
+	if (m_state->m_is_debug_mode)
+	{
+
+
+
+		for (int i = 0; i < m_solid_tile_areas.size(); i++)
+		{
+
+			graphics::drawRect(graphics::windowToCanvasX(m_solid_tile_areas[i]->getLeft() - Camera::inst()->getFocalPointX() + 8.0f, false),
+				graphics::windowToCanvasY(m_solid_tile_areas[i]->getTop() - Camera::inst()->getFocalPointY() + 8.0f, false),
+				graphics::windowToCanvasX(16.0f, false),
+				graphics::windowToCanvasY(16.0f, false),
+				m_solid_tile_areas[i]->m_debug_box_brush);
+		}
 	}
 
 	GameObject::draw();

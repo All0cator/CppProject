@@ -35,6 +35,8 @@ ParseInfo CSVParse::parseInts(std::string filePath, char separator)
 					idx = i + 1;
 				}
 			}
+
+			info.int_array.push_back(std::stoi(line.substr(idx, line.length() - 1)));
 		}
 
 		info.width = info.int_array.size() / info.height;

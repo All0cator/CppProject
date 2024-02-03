@@ -44,6 +44,7 @@ void ParallaxBackground::init()
 {
 	SETCOLOR(m_brush.fill_color, 1.0f, 1.0f, 1.0f);
 	m_brush.fill_opacity = 1.0f;
+	m_brush.outline_opacity = 0.0f;
 	m_brush.texture = m_parallax_path;
 
 	GameObject::init();
@@ -74,7 +75,7 @@ void ParallaxBackground::draw()
 				if (m_mirror_x)
 				{
 					graphics::drawRect(x_pos_canvas + m_half_width_canvas, y_pos_canvas + m_half_height_canvas, m_width_canvas, m_height_canvas, m_brush);
-					x_pos_pixels += (m_width_pixels) * m_horizontal_speed;
+					x_pos_pixels += m_width_pixels;
 					x_pos_canvas = graphics::windowToCanvasX(x_pos_pixels, false);
 				}
 				else

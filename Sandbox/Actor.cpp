@@ -36,6 +36,7 @@ Actor::~Actor()
 void Actor::resetAnimationConstants(const std::string& animation_name)
 {
 	this->m_current_frame_index = 0;
+	this->m_has_animation_end = false;
 	this->m_frame_timer->Reset(0.0f, true);
 	this->m_current_animation_name = animation_name;
 	if (m_animation_name_to_index.find(animation_name) != m_animation_name_to_index.end())
@@ -50,6 +51,8 @@ bool Actor::playAnimation(const std::string& animation_name)
 	{
 		resetAnimationConstants(animation_name);
 	}
+
+	return m_has_animation_end;
 
 	if (m_current_frame_index >= m_current_animation->m_num_frames)
 	{
@@ -75,6 +78,7 @@ void Actor::updateCurrentFrameIndex()
 	{
 		if (this->m_current_frame_index >= m_current_animation->m_num_frames)
 		{
+			this->m_has_animation_end = true;
 			this->m_current_frame_index = 0;
 		}
 	}
