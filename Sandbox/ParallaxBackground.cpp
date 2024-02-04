@@ -9,6 +9,7 @@ ParallaxBackground::ParallaxBackground(GameState * gs,
 									   const std::string& parallax_path,
 									   float width_pixels, float height_pixels, 
 									   float pos_x_pixels, float pos_y_pixels, 
+									   float map_width_pixels, float map_height_pixels,
 									   float horizontal_speed, float vertical_speed, 
 									   bool mirror_x, bool mirror_y)
 	: GameObject(gs, name)
@@ -22,6 +23,8 @@ ParallaxBackground::ParallaxBackground(GameState * gs,
 	this->m_half_height_canvas = this->m_height_canvas / 2.0f;
 	this->m_pos_x_pixels = pos_x_pixels;
 	this->m_pos_y_pixels = pos_y_pixels;
+	this->m_map_width_pixels = map_width_pixels;
+	this->m_map_height_pixels = map_height_pixels;
 	this->m_horizontal_speed = horizontal_speed;
 	this->m_vertical_speed = vertical_speed;
 	this->m_mirror_x = mirror_x;
@@ -52,60 +55,21 @@ void ParallaxBackground::init()
 
 void ParallaxBackground::draw()
 {	
-	float x_pos_start = Camera::inst()->getFocalPointX() - m_pos_x_pixels;
-	float y_pos_start = Camera::inst()->getFocalPointY() - m_pos_y_pixels;
+	float x_pos_start = 0.0f - Camera::inst()->getFocalPointX();
+	float y_pos_start = 0.0f - Camera::inst()->getFocalPointY();
 
 	int window_width_pixels = m_state->getWindowWidth();
 	int window_height_pixels = m_state->getWindowHeight();
 
-	float x_pos_pixels = (x_pos_start - (std::fmod(x_pos_start, m_width_pixels))) * m_horizontal_speed;
-	float y_pos_pixels = (y_pos_start - (std::fmod(y_pos_start, m_height_pixels))) * m_vertical_speed;
-	
-	float x_pos_canvas = graphics::windowToCanvasX(x_pos_pixels, false);
-	float y_pos_canvas = graphics::windowToCanvasY(y_pos_pixels, false);
 
-	// Do the texture mirroring
-	if (m_mirror_x || m_mirror_y)
+	while (x_pos_start < m_map_width_pixels)
 	{
-		while (y_pos_pixels < window_height_pixels)
-		{
-			while (x_pos_pixels < window_width_pixels)
-			{
-
-				if (m_mirror_x)
-				{
-					graphics::drawRect(x_pos_canvas + m_half_width_canvas, y_pos_canvas + m_half_height_canvas, m_width_canvas, m_height_canvas, m_brush);
-					x_pos_pixels += m_width_pixels;
-					x_pos_canvas = graphics::windowToCanvasX(x_pos_pixels, false);
-				}
-				else
-				{
-					break;
-				}
-			}
-
-			x_pos_pixels = x_pos_start * m_horizontal_speed;
-			x_pos_canvas = graphics::windowToCanvasX(x_pos_pixels, false);
-
-			if (m_mirror_y)
-			{
-
-				graphics::drawRect(x_pos_canvas + m_half_width_canvas, y_pos_canvas + m_half_height_canvas, m_width_canvas, m_height_canvas, m_brush);
-				y_pos_pixels += m_height_pixels * m_vertical_speed;
-				y_pos_canvas = graphics::windowToCanvasY(y_pos_pixels, false);
-			}
-			else
-			{
-				//graphics::drawRect(x_pos_canvas + m_half_width_canvas, y_pos_canvas + m_half_height_canvas, m_width_canvas, m_height_canvas, m_brush);
-				break;
-			}
-		}
+		graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
+		x_pos_start += m_width_pixels;
 	}
-	else
-	{
-		// Draw the background normally as with any texture
-		graphics::drawRect(x_pos_canvas + m_half_width_canvas, y_pos_canvas + m_half_height_canvas, m_width_canvas, m_height_canvas, m_brush);
-	}
+
+	graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
+
 
 	GameObject::draw();
 }

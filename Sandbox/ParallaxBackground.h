@@ -16,6 +16,9 @@ private:
 
 	float m_pos_x_pixels;
 	float m_pos_y_pixels;
+
+	float m_map_width_pixels;
+	float m_map_height_pixels;
 	
 	float m_horizontal_speed;
 	float m_vertical_speed;
@@ -32,6 +35,7 @@ public:
 					   const std::string& parallax_path,
 					   float width_pixels, float height_pixels, 
 					   float pos_x_pixels, float pos_y_pixels,
+					   float map_width_pixels, float map_height_pixels,
 					   float horizontal_speed, float vertical_speed = 1.0f,
 					   bool mirror_x = true, bool mirror_y = false);
 	virtual ~ParallaxBackground();

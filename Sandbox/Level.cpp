@@ -76,7 +76,7 @@ void Level::update(float dt)
 #include <iostream>
 void Level::init()
 {
-	Camera::inst()->setBounds(0.0f, (float)(m_level_map_width * TILE_WIDTH), 0.0f, (float)(m_level_map_height * TILE_HEIGHT));
+	Camera::inst()->setBounds(0.0f, (float)(m_level_map_width * TILE_WIDTH) - CANVAS_WIDTH, 0.0f, (float)(m_level_map_height * TILE_HEIGHT) - CANVAS_HEIGHT);
 	m_camera_min_x = Camera::inst()->getMinX();
 	m_camera_max_x = Camera::inst()->getMaxX();
 	m_camera_min_y = Camera::inst()->getMinY();
@@ -89,6 +89,7 @@ void Level::init()
 														   m_parallax_path,
 														   (float)PARALLAX_WIDTH, (float)PARALLAX_HEIGHT,
 														   0.0f, 0.0f, 
+														   (float)(m_level_map_width * TILE_WIDTH), (float)(m_level_map_height * TILE_HEIGHT),
 														   m_parallax_speeds_x[i], m_parallax_speeds_y[i],
 														   true, false);
 		m_parallax_backgrounds[i]->init();

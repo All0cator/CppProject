@@ -29,12 +29,29 @@ void Camera::setZoom(float zoom)
 void Camera::setFocalPointX(float focal_point_x)
 {
 	this->m_focal_point_x = focal_point_x - WINDOW_WIDTH / 2.0f;
+	if (this->m_focal_point_x > m_max_x)
+	{
+		this->m_focal_point_x = m_max_x;
+	}
 
+	if (this->m_focal_point_x < m_min_x)
+	{
+		this->m_focal_point_x = m_min_x;
+	}
 }
 
 void Camera::setFocalPointY(float focal_point_y)
 {
 	this->m_focal_point_y = focal_point_y - WINDOW_HEIGHT / 2.0f;
+	if (this->m_focal_point_y > m_max_y)
+	{
+		this->m_focal_point_y = m_max_y;
+	}
+
+	if (this->m_focal_point_y < m_min_y)
+	{
+		this->m_focal_point_y = m_min_y;
+	}
 }
 
 Camera::~Camera()
