@@ -62,13 +62,14 @@ void ParallaxBackground::draw()
 	int window_height_pixels = m_state->getWindowHeight();
 
 
-	while (x_pos_start < m_map_width_pixels)
-	{
-		graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
-		x_pos_start += m_width_pixels;
-	}
+	//while (x_pos_start < m_map_width_pixels)
+	//{
+		//graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
+		//x_pos_start += m_width_pixels;
+	//}
+	graphics::drawRect(0.0f + 200.0f, 0.0f + 200.0f, 500.0f, 500.0f, m_brush);
 
-	graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
+	//graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
 
 
 	GameObject::draw();

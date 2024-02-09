@@ -282,9 +282,9 @@ void GameState::init()
 									skeleton_animation_names,
 									skeleton_anim_directories,
 									skeleton_animation_frames,
-									13,
+									90.0f,
 									120.0f, 80.0f,
-									150.0f, 0.0f,
+									0.0f, 190.0f,
 									"Enemy1")
 	);
 
@@ -407,99 +407,4 @@ bool GameState::collide(Area& a, Area& b)
 	}
 
 	return false;
-
-	/*m_min_right = std::min(a.getRight(), b.getRight());
-	m_max_left = std::max(a.getLeft(), b.getLeft());
-
-	if (m_max_left >= m_min_right) return false;
-
-	m_min_bottom = std::min(a.getBottom(), b.getBottom());
-	m_max_top = std::max(a.getTop(), b.getTop());
-
-	if (m_max_top >= m_min_bottom) return false;
-
-	m_correction_x = m_min_right - m_max_left;
-	m_correction_y = m_min_bottom - m_max_top;
-	*/
-	// Find which points it collided with and store them in m_collision_points arrays 
-	// And how many points there were
-	// Area& b is the rectangle we want to correct the position
-
-	/*int numPoints = 0;
-
-	float xDiff = b.getPreviousLeft() - b.getLeft();
-
-	float intersectionX;
-	float intersectionY;
-
-	if (xDiff != 0.0f)
-	{
-		float slope = (b.getPreviousTop() - b.getTop()) / xDiff;
-		float absSlope = std::abs(slope);
-
-
-		// Our line equation that passes from previous position and the current is : 
-		//				solved for y	 y = slope * (x - Xprevious) + Yprevious
-		//				solved for x	 x = (y + slope * Xprevious + Yprevious) / slope
-		// 
-		// Find intersections with lines x = a.getLeft();
-		
-		// if it is inside then add it to the array
-			m_collision_points_x[numPoints] = ;
-			m_collision_points_y[numPoints] = ;
-			numPoints++;
-		//								 x = a.getRight();
-		// if it is inside then add it to the array
-			m_collision_points_x[numPoints] = ;
-			m_collision_points_y[numPoints] = ;
-			numPoints++;
-		//								 y = a.getTop();
-		if (absSlope > 0.0001f)
-		{
-			intersectionX = ;
-		}
-		else // Both lines are considered parallel to each other
-		{
-			// Check if they are both on top of each other
-			if (std::abs(a.getTop() - b.getTop()) < 0.0001f && a.getLeft() < b.getRight() && a.getRight() > b.getLeft())
-			{
-				// Assume intersection point is at snap point
-				intersectionX = a.getLeft();
-				intersectionY = a.getTop();
-			}
-			else
-			{
-				// There is no intersection point as we have 2 parallel lines
-			}
-		}
-		// if it is inside then add it to the array
-			m_collision_points_x[numPoints] = ;
-			m_collision_points_y[numPoints] = ;
-			numPoints++;
-		//								 y = a.getBottom();
-		// if it is inside then add it to the array
-			m_collision_points_x[numPoints] = ;
-			m_collision_points_y[numPoints] = ;
-			numPoints++;
-	}
-
-
-	// Find the closest point to the previous position
-	float min = std::sqrtf((m_collision_points_x[0] - a.getPreviousLeft()) * (m_collision_points_x[0] - a.getPreviousLeft())) +
-				std::sqrtf((m_collision_points_y[0] - a.getPreviousTop()) * (m_collision_points_y[0] - a.getPreviousTop()));
-	float dist;
-	for (int i = 1; i < numPoints; i++)
-	{
-		dist = std::sqrtf((m_collision_points_x[i] - a.getPreviousLeft()) * (m_collision_points_x[i] - a.getPreviousLeft())) +
-			   std::sqrtf((m_collision_points_y[i] - a.getPreviousTop()) * (m_collision_points_y[i] - a.getPreviousTop()));
-		
-		if (min > dist)
-		{
-			min = dist;
-			m_correction_x = m_collision_points_x[i];
-			m_correction_y = m_collision_points_y[i];
-		}
-	}*/
-
-	return true;
 }

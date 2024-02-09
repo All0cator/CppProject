@@ -26,6 +26,8 @@ private:
 
 	float m_scale_x;
 	float m_scale_y;
+	
+	bool m_x_axis_correction;
 
 public:
 	Area* m_side_collider;

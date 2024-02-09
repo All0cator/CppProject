@@ -36,10 +36,10 @@ Player::Player(GameState* gs,
 	this->m_texture_half_height = height_pixels / 2.0f;
 
 	m_ground_collider = new Area(21.0f, 16.0f, left_pixels + 44.0f, top_pixels + 64.0f, std::bind(&Player::ground_collider_callback, this, std::placeholders::_1), Area::AreaType::COLLIDER, Area::OriginType::PLAYER, this);
-	m_hurt_box = new Area(21.0f, 38.0f, left_pixels + 44.0f, top_pixels + 42.0f, std::bind(&Player::hurt_box_callback, this, std::placeholders::_1), Area::AreaType::HURTBOX, Area::OriginType::PLAYER, this);
+	m_hurt_box = new Area(8.0f, 31.0f, left_pixels + 58.0f, top_pixels + 42.0f, std::bind(&Player::hurt_box_callback, this, std::placeholders::_1), Area::AreaType::HURTBOX, Area::OriginType::PLAYER, this);
 	m_hit_box = new Area(66.0f, 43.0f, left_pixels + 51.0f, top_pixels + 37.0f, std::bind(&Player::hit_box_callback, this, std::placeholders::_1), Area::AreaType::HITBOX, Area::OriginType::PLAYER, this);
 	m_hit_box->m_is_active = false;
-	m_jump_timer = new Timer(1.0f);
+	m_jump_timer = new Timer(1.2f);
 	m_invincibility_timer = new Timer(1.0f);
 	m_attack_timer = new Timer(1.0f);
 }
@@ -201,6 +201,12 @@ void Player::updateInput()
 		}
 	}
 
+	if (!m_jump_timer->IsRunning())
+	{
+		m_is_jumping = false;
+		m_jump_timer->Reset();
+	}
+
 	// Down movement of player
 	if (graphics::getKeyState(graphics::SCANCODE_S))
 	{
@@ -209,12 +215,8 @@ void Player::updateInput()
 			m_is_crouched = true;
 		}
 
-		if (m_is_jumping)
-		{
-			m_velocity_y = 90.0f;
-			m_is_jumping = false;
-			//m_direction_y = 1.0f;
-		}
+		m_velocity_y = 90.0f;
+		m_is_jumping = false;
 
 		m_orientation_y = 1;
 	}
@@ -254,9 +256,16 @@ void Player::updateState()
 	m_hit_box->m_is_active = false;
 
 	// Dead frames
-	if (m_movement_state == State::TRANSITION_FALL && !m_animation_end) return;
+	if (m_movement_state == State::TRANSITION_FALL && !m_animation_end)
+	{
+		return;
+	}
 	if (m_movement_state == State::TRANSITION_CROUCH && !m_animation_end) return;
-	if (m_is_attacking && !m_animation_end) { m_hit_box->m_is_active = true; return; }
+	if (m_is_attacking && !m_animation_end)
+	{
+		m_hit_box->m_is_active = true;
+		return;
+	}
 
 	if (m_is_turning_arround)
 	{
@@ -269,11 +278,14 @@ void Player::updateState()
 	{
 		if (m_is_crouched)
 		{
-			if (m_movement_state != State::CROUCH)
+			if (m_movement_state == State::GROUND)
 			{
+				m_previous_movement_state = m_movement_state;
 				m_movement_state = State::TRANSITION_CROUCH;
 				return;
 			}
+
+			m_previous_movement_state = m_movement_state;
 			m_movement_state = State::CROUCH;
 			return;
 		}
@@ -281,10 +293,11 @@ void Player::updateState()
 		{
 			if (m_movement_state == State::CROUCH)
 			{
+				m_previous_movement_state = m_movement_state;
 				m_movement_state = State::TRANSITION_CROUCH;
 				return;
 			}
-
+			m_previous_movement_state = m_movement_state;
 			m_movement_state = State::GROUND;
 			return;
 		}
@@ -293,18 +306,21 @@ void Player::updateState()
 	{
 		if (m_is_jumping)
 		{
+			m_previous_movement_state = m_movement_state;
 			m_movement_state = State::AIR;
 			return;
 		}
 		else
 		{
-			if (m_movement_state == State::AIR)
+			if (m_previous_movement_state == State::AIR)
 			{
+				m_previous_movement_state = m_movement_state;
 				m_movement_state = State::TRANSITION_FALL;
 				return;
 			}
 			else
 			{
+				m_previous_movement_state = m_movement_state;
 				m_movement_state = State::FALL;
 				return;
 			}
@@ -509,7 +525,7 @@ void Player::updateAreaDimensions()
 	m_new_x_axis = (this->getLeft() + this->getRight()) / 2.0f;
 
 	m_ground_collider->updatePositions(this->getLeft() + 44.0f, this->getTop() + 64.0f, m_new_x_axis);
-	m_hurt_box->updatePositions(this->getLeft() + 44.0f, this->getTop() + 42.0f, m_new_x_axis);
+	m_hurt_box->updatePositions(this->getLeft() + 58.0f, this->getTop() + 46.0f, m_new_x_axis);
 	m_hit_box->updatePositions(this->getLeft() + 51.0f, this->getTop() + 37.0f, m_new_x_axis);
 
 	if (m_orientation_x == -1)
@@ -549,7 +565,7 @@ void Player::init()
 	//m_scale_y = 0.25f;
 
 	m_base_hp = 100.0f;
-	m_base_dmg = 50.0f;
+	m_base_dmg = 100.0f;
 	
 	m_hp = m_base_hp;
 	m_dmg = m_base_dmg;
@@ -591,7 +607,7 @@ void Player::draw()
 {
 	if (m_is_disabled) return;
 
-	m_brush.texture = getCurrentFrame();
+	m_brush.texture = /*"assets\\textures\\knight\\Idle\\0.png";*/getCurrentFrame();
 	
 	if (m_is_flickering)
 	{
@@ -662,7 +678,7 @@ void Player::takeDmg(float ammount)
 
 	if (!m_invincibility_timer->IsRunning())
 	{
-		//m_hp -= ammount;
+		m_hp -= ammount;
 		m_is_flickering = true;
 		m_invincibility_timer->Start();
 	}
@@ -703,47 +719,6 @@ void Player::correctPos(Area & other)
 			m_velocity_y = 0.0f;
 		}
 	}
-
-	//if (m_x_axis_correction == true)
-	//{
-		//std::cout << "X-axis" << std::endl;
-		
-	//}
-	//else
-	//{
-		
-	
-	//}
-
-	/*if (m_direction_x != 0)
-	{
-		if (m_direction_x > 0)
-		{
-			setLeft(getLeft() - GameObject::m_state->inst()->m_correction_x);
-		}
-		else
-		{
-			setLeft(getLeft() + GameObject::m_state->inst()->m_correction_x);
-		}
-	}
-
-	if (m_direction_y != 0)
-	{
-		if (m_direction_y > 0)
-		{
-			setTop(getTop() - GameObject::m_state->inst()->m_correction_y);
-		}
-		else
-		{
-			setTop(getTop() + GameObject::m_state->inst()->m_correction_y);
-		}
-	}*/
-
-	//setLeft(GameObject::m_state->inst()->m_correction_x - this->m_width_pixels);
-	//setTop(GameObject::m_state->inst()->m_correction_y - this->m_height_pixels);
-
-	//setLeft(getPreviousLeft());
-	//setTop(getPreviousTop());
 
 	m_is_grounded = true;
 }
