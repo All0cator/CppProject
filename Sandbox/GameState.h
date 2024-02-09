@@ -86,6 +86,8 @@ public:
 	bool m_is_debug_mode;
 	float m_correction_x;
 	float m_correction_y;
+	float m_collision_points_x[4];
+	float m_collision_points_y[4];
 
 public:
 	static GameState * inst();

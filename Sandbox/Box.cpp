@@ -15,6 +15,8 @@ Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_p
 	this->m_height_pixels = height_pixels;
 	this->m_half_height_pixels = height_pixels / 2.0f;
 
+	this->m_previous_top = top_pixels;
+	this->m_previous_left = left_pixels;
 	this->m_top = top_pixels;
 	this->m_left= left_pixels;
 	this->m_right = left_pixels + width_pixels;
@@ -89,29 +91,37 @@ void Box::setLeftTop(float new_left, float new_top)
 
 void Box::setLeft(float new_left)
 {
+	m_previous_left = m_left;
 	m_left = new_left;
 	m_right = m_left + m_width_pixels;
 }
 
 void Box::setTop(float new_top)
 {
+	m_previous_top = m_top;
 	m_top = new_top;
 	m_bottom = m_top + m_height_pixels;
 }
 
 void Box::setBottom(float new_bottom)
 {
-	m_bottom = new_bottom;
-	m_top = m_bottom - m_height_pixels;
+	setTop(new_bottom - m_height_pixels);
 }
 
 void Box::setRight(float new_right)
 {
-	m_right = new_right;
-	m_left = m_right - m_width_pixels;
+	setLeft(new_right - m_width_pixels);
 }
 
+float Box::getPreviousTop()
+{
+	return m_previous_top;
+}
 
+float Box::getPreviousLeft()
+{
+	return m_previous_left;
+}
 
 float Box::getLeft()
 {

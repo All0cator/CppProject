@@ -28,7 +28,8 @@ void Camera::setZoom(float zoom)
 
 void Camera::setFocalPointX(float focal_point_x)
 {
-	this->m_focal_point_x = focal_point_x - WINDOW_WIDTH / 2.0f;
+	this->m_focal_point_x = focal_point_x  - WINDOW_WIDTH / 2.0f;
+	
 	if (this->m_focal_point_x > m_max_x)
 	{
 		this->m_focal_point_x = m_max_x;

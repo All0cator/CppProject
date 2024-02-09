@@ -70,7 +70,7 @@ void Player::ground_collider_callback(Area& other)
 
 void Player::hurt_box_callback(Area& other)
 {
-	std::cout << "LOL" << std::endl;
+	//std::cout << "LOL" << std::endl;
 	switch (other.m_type)
 	{
 	case Area::AreaType::TILE:
@@ -132,6 +132,14 @@ void Player::update(float dt)
 	if (m_movement_state != State::DEAD)
 	{
 		updateInput();
+		if (m_velocity_y >= 0.0f)
+		{
+			m_direction_y = 1.0f;
+		}
+		else
+		{
+			m_direction_y = -1.0f;
+		}
 	}
 	updateState();
 	updateAnimation();
@@ -139,7 +147,7 @@ void Player::update(float dt)
 	updateMovement(dt);
 	updateAreaDimensions(); // called before checking for collisions as we first move everything then check for collisions
 	checkCollisions();
-	updateAreaDimensions(); // we might have moved so to technically be correct we need to update again our areas
+	//updateAreaDimensions(); // we might have moved so to technically be correct we need to update again our areas
 
 	
 	//graphics::drawText(graphics::windowToCanvasX(this->getLeft()), graphics::windowToCanvasY(this->getRight()),  16.0f, "Player State: " + std::to_string(m_movement_state) + m_current_animation_name + std::to_string(m_current_frame_index) + "  " + std::to_string(m_frame_timer->GetAccumulatedTime()), m_debug_text);
@@ -161,6 +169,7 @@ void Player::updateInput()
 			flipAreasX();
 		}
 		m_direction_x = -1.0f;
+		m_velocity_x = 90.0f;
 	}
 	else if (graphics::getKeyState(graphics::SCANCODE_D))
 	{
@@ -171,6 +180,7 @@ void Player::updateInput()
 			flipAreasX();
 		}
 		m_direction_x = 1.0f;
+		m_velocity_x = 90.0f;
 	}
 	else
 	{
@@ -184,9 +194,10 @@ void Player::updateInput()
 		if (m_is_grounded)
 		{
 			m_is_jumping = true;
-			m_direction_y = -1.0f;
-			m_orientation_y = -1;
-			m_velocity_y = 20.0f;
+			//m_direction_y = -1.0f;
+			//m_orientation_y = -1;
+			m_velocity_y = -150.0f;
+			m_is_grounded = false;
 		}
 	}
 
@@ -198,8 +209,13 @@ void Player::updateInput()
 			m_is_crouched = true;
 		}
 
-		m_is_jumping = false;
-		m_direction_y = 1.0f;
+		if (m_is_jumping)
+		{
+			m_velocity_y = 90.0f;
+			m_is_jumping = false;
+			//m_direction_y = 1.0f;
+		}
+
 		m_orientation_y = 1;
 	}
 
@@ -443,16 +459,25 @@ void Player::updateTimers(float dt)
 void Player::updateMovement(float dt)
 {
 	// Normalize movement direction if it is not 0
-	if (m_direction_x != 0.0f || m_direction_y != 0.0f)
+	if (m_direction_x != 0.0f && m_direction_y != 0.0f)
 	{
 		m_direction_length = std::sqrt(m_direction_x * m_direction_x + m_direction_y * m_direction_y);
 		m_direction_x = m_direction_x / m_direction_length;
 		m_direction_y = m_direction_y / m_direction_length;
 	}
 
-
+	m_x_axis_correction = true;
 	setLeft(getLeft() + m_velocity_x * m_direction_x * dt);
-	setTop(getTop() + m_velocity_y * m_direction_y * dt);
+	updateAreaDimensions();
+	m_state->checkCollisionsWithGround(*this->m_hurt_box);
+
+
+	m_x_axis_correction = false;
+	setTop(getTop() + 0.5f * m_acceleration_y * dt * dt + m_velocity_y * dt);
+	updateAreaDimensions();
+	m_state->checkCollisionsWithGround(*this->m_hurt_box);
+
+
 
 	Camera::inst()->setFocalPointX(getLeft() + m_texture_half_width);
 	Camera::inst()->setFocalPointY(getTop() + m_texture_half_height);
@@ -468,6 +493,15 @@ void Player::updateMovement(float dt)
 	{
 		m_velocity_y = -m_max_velocity_y;
 	}
+
+	if (m_velocity_y >= 0.0f)
+	{
+		m_direction_y = 1.0f;
+	}
+	else
+	{
+		m_direction_y = -1.0f;
+	}
 }
 
 void Player::updateAreaDimensions()
@@ -481,7 +515,7 @@ void Player::updateAreaDimensions()
 	if (m_orientation_x == -1)
 	{
 		m_ground_collider->flipX();
-		m_hurt_box->flipX();
+		//m_hurt_box->flipX();
 		m_hit_box->flipX();
 	}
 }
@@ -490,7 +524,7 @@ void Player::checkCollisions()
 {
 	m_state->checkCollisionsWithEnemies(*m_hit_box);
 	m_state->checkCollisionsWithEnemies(*m_hurt_box);
-	m_state->checkCollisionsWithGround(*m_hurt_box);
+	//m_state->checkCollisionsWithGround(*m_hurt_box);
 	m_state->checkCollisionsWithGround(*m_ground_collider);
 }
 
@@ -523,12 +557,12 @@ void Player::init()
 	m_orientation_x = 1;
 	m_orientation_y = 1;
 	m_direction_x = 0.0f;
-	m_direction_y = 0.0f;
+	m_direction_y = 1.0f;
 
-	m_velocity_x = 50.0f;
-	m_acceleration_y = 20.0f;
+	m_velocity_x = 90.0f;
+	m_acceleration_y = 150.0f;
 	m_velocity_y = m_acceleration_y;
-	m_max_velocity_y = 20.0f;
+	m_max_velocity_y = 100.0f;
 
 	m_is_moving = false;
 	m_is_jumping = false;
@@ -636,7 +670,52 @@ void Player::takeDmg(float ammount)
 
 void Player::correctPos(Area & other)
 {
-	if (m_direction_x != 0)
+
+	if (m_x_axis_correction)
+	{
+		if (m_direction_x > 0.0f)
+		{
+			this->setLeft(this->getLeft() - (m_hurt_box->getRight() - other.getLeft()));
+			m_hurt_box->setRight(other.getLeft());
+			m_velocity_x = 0.0f;
+		}
+		else if(m_direction_x < 0.0f)
+		{
+			this->setLeft(this->getLeft() + (other.getRight() - m_hurt_box->getLeft()));
+			m_hurt_box->setLeft(other.getRight());
+			m_velocity_x = 0.0f;
+		}
+	}
+	else
+	{ 
+		//std::cout << "Y axis" << std::endl;
+		if (m_velocity_y > 0.0f)
+		{
+			//std::cout << "GOl"  << std::endl;
+			this->setTop(this->getTop() - (m_hurt_box->getBottom() - other.getTop()));
+			m_hurt_box->setBottom(other.getTop());
+			m_velocity_y = 0.0f;
+		}
+		else if (m_velocity_y < 0.0f)
+		{
+			this->setTop(this->getTop() + (other.getBottom() - m_hurt_box->getTop()));
+			m_hurt_box->setTop(other.getBottom());
+			m_velocity_y = 0.0f;
+		}
+	}
+
+	//if (m_x_axis_correction == true)
+	//{
+		//std::cout << "X-axis" << std::endl;
+		
+	//}
+	//else
+	//{
+		
+	
+	//}
+
+	/*if (m_direction_x != 0)
 	{
 		if (m_direction_x > 0)
 		{
@@ -658,7 +737,13 @@ void Player::correctPos(Area & other)
 		{
 			setTop(getTop() + GameObject::m_state->inst()->m_correction_y);
 		}
-	}
+	}*/
+
+	//setLeft(GameObject::m_state->inst()->m_correction_x - this->m_width_pixels);
+	//setTop(GameObject::m_state->inst()->m_correction_y - this->m_height_pixels);
+
+	//setLeft(getPreviousLeft());
+	//setTop(getPreviousTop());
 
 	m_is_grounded = true;
 }

@@ -307,7 +307,7 @@ void Enemy::init()
 	m_direction_x = 0.0f;
 	m_direction_y = 0.0f;
 
-	m_velocity_x = 2.0f;
+	m_velocity_x = 90.0f;
 	m_acceleration_y = 6.0f;
 	m_velocity_y = m_acceleration_y;
 	m_max_velocity_y = 6.0f;

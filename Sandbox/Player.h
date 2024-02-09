@@ -65,6 +65,8 @@ private:
 	bool m_is_turning_arround;
 	bool m_is_flickering;
 
+	bool m_x_axis_correction;
+
 	graphics::Brush m_brush;
 	graphics::Brush m_debug_text;
 

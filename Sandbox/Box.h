@@ -13,6 +13,9 @@ public:
 	float m_half_height_pixels;
 
 private:
+	float m_previous_top;
+	float m_previous_left;
+
 	float m_top;
 	float m_left;
 	float m_right;
@@ -40,6 +43,9 @@ public:
 	void setTop(float new_top);
 	void setBottom(float new_bottom);
 	void setRight(float new_right);
+	
+	float getPreviousTop();
+	float getPreviousLeft();
 
 	float getLeft();
 	float getTop();

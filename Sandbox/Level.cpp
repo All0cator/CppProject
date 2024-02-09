@@ -202,6 +202,7 @@ void Level::checkTileCollisions(Area& area)
 		if (m_state->collide(*m_solid_tile_areas[i], area))
 		{
 			area.resolveCollision(*m_solid_tile_areas[i]);
+			break;
 		}
 	}
 }
