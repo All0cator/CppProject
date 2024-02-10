@@ -9,9 +9,6 @@ private:
 	float m_focal_point_x;
 	float m_focal_point_y;
 
-	// Scales the objects
-	float m_zoom;
-
 	float m_min_x;
 	float m_max_x;
 	float m_min_y;
@@ -20,12 +17,10 @@ public:
 	static Camera * inst();
 
 	void setBounds(float min_x, float max_x, float min_y, float max_y);
-	void setZoom(float zoom);
 	void setFocalPointX(float focal_point_x);
 	void setFocalPointY(float focal_point_y);
 	float getFocalPointX();
 	float getFocalPointY();
-	float getZoom();
 	float getMinX();
 	float getMaxX();
 	float getMinY();

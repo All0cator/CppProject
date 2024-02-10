@@ -18,39 +18,24 @@ Level::Level(GameState* gs,
 			 int level_map_width,
 			 int level_map_height,
 			 const std::string& level_path,
-			 const std::string& parallax_path,
 			 const std::vector<int>& tileset_indices,
 			 const std::vector<std::string>& group_names,
 			 const std::vector<int>& group_indices,
-			 const std::vector<std::string>& layer_names,
-			 const std::vector<std::string>& parallax_names,
-			 const std::vector<float>& parallax_speeds_x,
-			 const std::vector<float>& parallax_speeds_y)
+			 const std::vector<std::string>& layer_names)
 	: GameObject(gs, name)
 {
 	this->m_level_index = level_index;
 	this->m_level_map_width = level_map_width;
 	this->m_level_map_height = level_map_height;
 	this->m_level_path = level_path;
-	this->m_parallax_path = parallax_path;
 	this->m_tileset_indices = tileset_indices;
 	this->m_group_names = group_names;
 	this->m_group_indices = group_indices;
 	this->m_layer_names = layer_names;
-	this->m_parallax_names = parallax_names;
-	this->m_parallax_speeds_x = parallax_speeds_x;
-	this->m_parallax_speeds_y = parallax_speeds_y;
-
-	//m_parallax_backgrounds.resize(parallax_names.size());
 }
 
 Level::~Level()
 {
-	//for (int i = 0; i < m_parallax_backgrounds.size(); i++)
-	//{
-	//	delete m_parallax_backgrounds[i];
-	//}
-
 	for (int i = 0; i < m_environment_layers.size(); i++)
 	{
 		delete m_environment_layers[i];
@@ -157,11 +142,6 @@ void Level::init()
 
 void Level::draw()
 {
-	//for (int i = 0; i < m_parallax_backgrounds.size(); i++)
-	//{
-	//	m_parallax_backgrounds[i]->draw();
-	//}
-
 	for (int i = 0; i < m_environment_layers.size(); i++)
 	{
 		m_environment_layers[i]->draw();
@@ -190,11 +170,6 @@ void Level::draw()
 void Level::checkCollisions(Area& area)
 {
 	checkTileCollisions(area);
-	
-	if (area.m_type == Area::AreaType::HURTBOX)
-	{
-		//checkBoundsCollisions(area);
-	}
 }
 
 void Level::checkTileCollisions(Area& area)
@@ -206,30 +181,5 @@ void Level::checkTileCollisions(Area& area)
 			area.resolveCollision(*m_solid_tile_areas[i]);
 			break;
 		}
-	}
-}
-
-void Level::checkBoundsCollisions(Area& area)
-{
-	// Clamp box dimensions
-
-	// X axis
-	if (area.getLeft() < m_camera_min_x)
-	{
-		area.setLeft(m_camera_min_x);
-	}
-	else if (area.getRight() > m_camera_max_x)
-	{
-		area.setRight(m_camera_max_x);
-	}
-
-	// Y axis
-	if (area.getTop() < m_camera_min_y)
-	{
-		area.setTop(m_camera_min_y);
-	}
-	else if (area.getBottom() > m_camera_max_y)
-	{
-		area.setBottom(m_camera_max_y);
 	}
 }

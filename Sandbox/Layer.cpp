@@ -46,7 +46,6 @@ void Layer::init()
 
 void Layer::draw()
 {
-	float zoom = Camera::inst()->getZoom();
 	float focal_point_x = Camera::inst()->getFocalPointX();
 	float focal_point_y = Camera::inst()->getFocalPointY();
 
@@ -54,8 +53,8 @@ void Layer::draw()
 
 	float x_pixels;
 	float y_pixels;
-	float width_pixels = TILE_WIDTH * zoom;
-	float height_pixels = TILE_HEIGHT * zoom;
+	float width_pixels = TILE_WIDTH;
+	float height_pixels = TILE_HEIGHT;
 	float half_width_pixels = width_pixels / 2.0f;
 	float half_height_pixels = height_pixels / 2.0f;
 
@@ -70,17 +69,12 @@ void Layer::draw()
 		{
 			// Check if the tile is valid else skip
 			map_value = m_map[y * m_width + x];
+
 			if (map_value == -1) continue;
 			
-			// Culling if tile is inside window else skip
-			x_pixels = (x * TILE_WIDTH + m_layer_offset_x - focal_point_x);// + TILE_WIDTH * zoom;
-			
-			//if (x_pixels > WINDOW_WIDTH || x_pixels + width_pixels < 0) continue;
+			x_pixels = (x * TILE_WIDTH + m_layer_offset_x - focal_point_x);
+			y_pixels = (y * TILE_HEIGHT - focal_point_y);
 
-			y_pixels = (y * TILE_HEIGHT - focal_point_y); //+ TILE_HEIGHT * zoom;
-
-			//if (y_pixels > WINDOW_HEIGHT || y_pixels + height_pixels < 0) continue;
-			// 
 			// Draw
 			m_tile_brush.texture = m_tileset->m_tileset_path + m_tileset->m_index_to_texture[map_value] + ".png";
 			graphics::drawRect(graphics::windowToCanvasX(x_pixels + half_width_pixels, false),
@@ -98,8 +92,6 @@ void Layer::draw()
 					m_debug_brush);
 			}
 		}
-
-		//std::cout << std::endl;
 	}
 
 	GameObject::draw();

@@ -21,11 +21,6 @@ void Camera::setBounds(float min_x, float max_x, float min_y, float max_y)
 	this->m_max_y = max_y;
 }
 
-void Camera::setZoom(float zoom)
-{
-	this->m_zoom = zoom;
-}
-
 void Camera::setFocalPointX(float focal_point_x)
 {
 	this->m_focal_point_x = focal_point_x - WINDOW_WIDTH / 2.0f;
@@ -73,11 +68,6 @@ float Camera::getFocalPointX()
 float Camera::getFocalPointY()
 {
 	return m_focal_point_y;
-}
-
-float Camera::getZoom()
-{
-	return m_zoom;
 }
 
 float Camera::getMinX()

@@ -3,6 +3,7 @@
 #include <iostream>
 
 
+
 // We could make it generic but there is no reason to overengineer this
 // We only need to parse integers
 ParseInfo CSVParse::parseInts(std::string filePath, char separator)

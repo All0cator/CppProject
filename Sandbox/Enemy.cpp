@@ -34,30 +34,12 @@ Enemy::Enemy(GameState* gs,
 	this->m_texture_height = height_pixels;
 	this->m_texture_half_height = height_pixels / 2.0f;
 
-	m_side_collider = new Area(12.0f, 32.0f, left_pixels + 69.0f, top_pixels + 47.0f, std::bind(&Enemy::side_collider_callback, this, std::placeholders::_1), Area::AreaType::COLLIDER, Area::OriginType::ENEMY, this);
 	m_hurt_box = new Area(22.0f, 31.0f, left_pixels + 58.0f, top_pixels + 46.0f, std::bind(&Enemy::hurt_box_callback, this, std::placeholders::_1), Area::AreaType::HURTBOX, Area::OriginType::ENEMY, this);
 	m_hit_box = new Area(40.0f, 31.0f, left_pixels + 54.0f, top_pixels + 47.0f, std::bind(&Enemy::hit_box_callback, this, std::placeholders::_1), Area::AreaType::HITBOX, Area::OriginType::ENEMY, this);
 	m_notice_area = new Area(width_pixels * 1.5f, height_pixels * 1.5f, left_pixels - 0.75f * width_pixels, top_pixels - 0.75f * height_pixels, std::bind(&Enemy::noticeAreaCallback, this, std::placeholders::_1), Area::AreaType::COLLIDER, Area::OriginType::ENEMY, this);
 
 	m_invincibility_timer = new Timer(1.5f);
 	m_sound_timer = new Timer(1.5f);
-}
-
-void Enemy::side_collider_callback(Area& other)
-{
-	switch (other.m_type)
-	{
-	case Area::AreaType::TILE:
-
-		switch (other.m_origin)
-		{
-		case Area::OriginType::LEVEL:
-			//m_direction_x *= -1;
-			break;
-		}
-
-		break;
-	}
 }
 
 void Enemy::hurt_box_callback(Area& other)
@@ -81,16 +63,6 @@ void Enemy::hurt_box_callback(Area& other)
 			correctPos(other);
 			break;
 		}
-		break;
-	case Area::AreaType::HURTBOX:
-
-		switch (other.m_origin)
-		{
-		case Area::OriginType::PLAYER:
-			//static_cast<Player&>(*other.m_origin_ptr).takeDmg(m_dmg);
-			break;
-		}
-
 		break;
 	case Area::AreaType::HITBOX:
 
@@ -174,7 +146,6 @@ void Enemy::update(float dt)
 	updateMovement(dt);
 	updateAreaDimensions();
 	checkCollisions();
-	//updateAreaDimensions(); // We might have moved in collisions so we need to adjust everything again
 
 	GameObject::update(dt);
 }
@@ -307,16 +278,12 @@ void Enemy::updateAreaDimensions()
 {
 	m_new_x_axis = (this->getLeft() + this->getRight()) / 2.0f;
 
-	m_side_collider->updatePositions(this->getLeft() + 69.0f, this->getTop() + 47.0f, m_new_x_axis);
 	m_hurt_box->updatePositions(this->getLeft() + 58.0f, this->getTop() + 46.0f, m_new_x_axis);
-	SETCOLOR(m_hurt_box->m_debug_box_brush.outline_color, 1.0f, 0.0f, 1.0f);
 	m_hit_box->updatePositions(this->getLeft() + 54.0f, this->getTop() + 47.0f, m_new_x_axis);
 	m_notice_area->updatePositions(this->getLeft() -  0.25f * m_texture_width, this->getTop() - 0.25f * m_texture_height, m_new_x_axis);
 
 	if (m_orientation_x == -1)
 	{
-		//m_side_collider->flipX();
-		//m_hurt_box->flipX();
 		m_hit_box->flipX();
 		m_notice_area->flipX();
 	}
@@ -326,15 +293,10 @@ void Enemy::checkCollisions()
 {
 	m_state->checkCollisionWithPlayer(*m_hit_box);
 	m_state->checkCollisionWithPlayer(*m_hurt_box);
-	//m_state->checkCollisionsWithGround(*m_hurt_box);
-	m_state->checkCollisionsWithGround(*m_side_collider);
-	//m_state->checkCollisionWithPlayer(*m_notice_area);
 }
 
 void Enemy::flipAreasX()
 {
-	m_side_collider->flipX();
-	//m_hurt_box->flipX();
 	m_hit_box->flipX();
 	m_notice_area->flipX();
 }
@@ -375,10 +337,8 @@ void Enemy::correctPos(Area& other)
 	}
 	else
 	{
-		//std::cout << "Y axis" << std::endl;
 		if (m_velocity_y > 0.0f)
 		{
-			//std::cout << "GOl"  << std::endl;
 			this->setTop(this->getTop() - (m_hurt_box->getBottom() - other.getTop()));
 			m_hurt_box->setBottom(other.getTop());
 			m_velocity_y = 0.0f;
@@ -462,15 +422,6 @@ void Enemy::draw()
 			graphics::windowToCanvasY(m_texture_height, false),
 			m_debug_box_brush);
 
-
-		// Side Collider
-		graphics::drawRect(graphics::windowToCanvasX(m_side_collider->getLeft() - Camera::inst()->getFocalPointX() + m_side_collider->m_half_width_pixels, false),
-			graphics::windowToCanvasY(m_side_collider->getTop() - Camera::inst()->getFocalPointY() + m_side_collider->m_half_height_pixels, false),
-			graphics::windowToCanvasX(m_side_collider->m_width_pixels, false),
-			graphics::windowToCanvasY(m_side_collider->m_height_pixels, false),
-			m_side_collider->m_debug_box_brush);
-
-
 		// Hurt Box
 		graphics::drawRect(graphics::windowToCanvasX(m_hurt_box->getLeft() - Camera::inst()->getFocalPointX() + m_hurt_box->m_half_width_pixels, false),
 			graphics::windowToCanvasY(m_hurt_box->getTop() - Camera::inst()->getFocalPointY() + m_hurt_box->m_half_height_pixels, false),
@@ -505,7 +456,6 @@ Enemy::~Enemy()
 {
 	delete m_invincibility_timer;
 	delete m_sound_timer;
-	delete m_side_collider;
 	delete m_hurt_box;
 	delete m_hit_box;
 	delete m_notice_area;

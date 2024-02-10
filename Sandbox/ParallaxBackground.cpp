@@ -17,9 +17,9 @@ ParallaxBackground::ParallaxBackground(GameState * gs,
 	this->m_parallax_path = parallax_path + name + ".png";
 	this->m_width_pixels = width_pixels;
 	this->m_height_pixels = height_pixels;
-	this->m_width_canvas = 512.0f; //graphics::windowToCanvasX(m_width_pixels, false);
+	this->m_width_canvas = 512.0f;
 	this->m_half_width_canvas = this->m_width_canvas / 2.0f;
-	this->m_height_canvas = 512.0f;//graphics::windowToCanvasY(m_height_pixels, false);
+	this->m_height_canvas = 512.0f;
 	this->m_half_height_canvas = this->m_height_canvas / 2.0f;
 	this->m_pos_x_pixels = pos_x_pixels;
 	this->m_pos_y_pixels = pos_y_pixels;

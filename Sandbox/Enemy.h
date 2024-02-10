@@ -30,7 +30,6 @@ private:
 	bool m_x_axis_correction;
 
 public:
-	Area* m_side_collider;
 	Area* m_hurt_box;
 	Area* m_hit_box;
 	Area* m_notice_area;
@@ -93,7 +92,6 @@ public:
 		float G = 0.0f,
 		float B = 0.0f);
 
-	void side_collider_callback(Area& other);
 	void hurt_box_callback(Area& other);
 	void hit_box_callback(Area& other);
 	void noticeAreaCallback(Area& other);

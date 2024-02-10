@@ -28,9 +28,6 @@ Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_p
 Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_pixels, float R, float G, float B)
 	: Box(width_pixels, height_pixels, left_pixels, top_pixels)
 {
-	// Todo
-	// First we need to clamp values to a valid range what this means is
-	// Check if color values are < 0.0f if so make them 0.0f if they are > 255.0f make them 255.0f
 	if (R < 0.0f)
 	{
 		R = 0.0f;
@@ -74,9 +71,6 @@ Box::Box(float width_pixels, float height_pixels, float left_pixels, float top_p
 	{
 		B = B / 255.0f;
 	}
-
-	// Call setOutlineParameters with R, G, B values
-
 	setOutlineParameters(R, G, B, 1.0f, 1.0f);
 }
 

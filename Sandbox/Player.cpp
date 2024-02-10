@@ -87,7 +87,6 @@ void Player::ground_collider_callback(Area& other)
 
 void Player::hurt_box_callback(Area& other)
 {
-	//std::cout << "LOL" << std::endl;
 	switch (other.m_type)
 	{
 	case Area::AreaType::TILE:
@@ -173,7 +172,7 @@ void Player::update(float dt)
 	updateMovement(dt);
 	updateAreaDimensions(); // called before checking for collisions as we first move everything then check for collisions
 	checkCollisions();
-	//updateAreaDimensions(); // we might have moved so to technically be correct we need to update again our areas
+	
 	if (m_is_attacking)
 	{
 		if (!m_attack_sound_timer->IsRunning() && m_is_first_hit)
@@ -191,7 +190,6 @@ void Player::update(float dt)
 		}
 	}
 	
-	//graphics::drawText(this->getLeft() - Camera::inst()->getFocalPointX(), this->getTop() - Camera::inst()->getFocalPointY(), 16.0f, "Player HP: (" + std::to_string(m_hp) + ")", m_debug_text);
 	GameObject::update(dt);
 }
 
@@ -205,7 +203,6 @@ void Player::updateInput()
 		if (m_orientation_x != -1)
 		{
 			m_is_turning_arround = true;
-			flipAreasX();
 		}
 		m_direction_x = -1.0f;
 		m_velocity_x = 90.0f;
@@ -216,7 +213,6 @@ void Player::updateInput()
 		if (m_orientation_x != 1)
 		{
 			m_is_turning_arround = true;
-			flipAreasX();
 		}
 		m_direction_x = 1.0f;
 		m_velocity_x = 90.0f;
@@ -233,8 +229,6 @@ void Player::updateInput()
 		if (m_is_grounded)
 		{
 			m_is_jumping = true;
-			//m_direction_y = -1.0f;
-			//m_orientation_y = -1;
 			m_velocity_y = -150.0f;
 			m_is_grounded = false;
 		}
@@ -403,14 +397,12 @@ void Player::updateAnimation()
 			if (m_animation_end)
 			{
 				m_orientation_x *= -1;
-				//flipAreasX();
 				m_is_turning_arround = false;
 			}
 		}
 		else
 		{
 			m_orientation_x *= -1;
-			//flipAreasX();
 			m_is_turning_arround = false;
 		}
 		
@@ -585,7 +577,6 @@ void Player::updateAreaDimensions()
 	if (m_orientation_x == -1)
 	{
 		m_ground_collider->flipX();
-		//m_hurt_box->flipX();
 		m_hit_box->flipX();
 	}
 }
@@ -594,16 +585,7 @@ void Player::checkCollisions()
 {
 	m_state->checkCollisionsWithEnemies(*m_hit_box);
 	m_state->checkCollisionsWithEnemies(*m_hurt_box);
-	//m_state->checkCollisionsWithGround(*m_hurt_box);
 	m_state->checkCollisionsWithGround(*m_ground_collider);
-}
-
-void Player::flipAreasX()
-{
-	//std::cout << "we flip" << std::endl;
-	//m_ground_collider->flipX();
-	//m_hurt_box->flipX();
-	//m_hit_box->flipX();
 }
 
 void Player::init() 
@@ -614,9 +596,6 @@ void Player::init()
 
 	m_movement_state = State::GROUND;
 	m_previous_movement_state = State::GROUND;
-
-	//m_scale_x = 0.25f;
-	//m_scale_y = 0.25f;
 
 	m_base_hp = 300.0f;
 	m_base_dmg = 50.0f;
@@ -650,7 +629,7 @@ void Player::init()
 	SETCOLOR(m_brush.fill_color, 1.0f, 1.0f, 1.0f);
 	m_brush.fill_opacity = 1.0f;
 	m_brush.outline_opacity = 0.0f;
-	m_brush.texture = "assets\\textures\\knight\\Idle\\0.png";//m_textures_path + KNIGHT_ANIM_IDLE + "/0.png";
+	m_brush.texture = "assets\\textures\\knight\\Idle\\0.png";
 
 	m_jump_timer->Reset();
 	m_invincibility_timer->Reset();
@@ -761,10 +740,8 @@ void Player::correctPos(Area & other)
 	}
 	else
 	{ 
-		//std::cout << "Y axis" << std::endl;
 		if (m_velocity_y > 0.0f)
 		{
-			//std::cout << "GOl"  << std::endl;
 			this->setTop(this->getTop() - (m_hurt_box->getBottom() - other.getTop()));
 			m_hurt_box->setBottom(other.getTop());
 			m_velocity_y = 0.0f;

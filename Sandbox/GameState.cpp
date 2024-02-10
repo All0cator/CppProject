@@ -52,11 +52,6 @@ void GameState::update(float dt)
 	// dt is in milliseconds so / 1000.0f will make it in seconds
 	float deltaTime = dt / 1000.0f;
 
-	/*if (timer->IsRunning())
-	{
-		timer->Update(dt);
-		std::cout << timer->GetAccumulatedTime() << std::endl;
-	}*/
 	if (graphics::getKeyState(graphics::SCANCODE_Q))
 	{
 		if (!m_toggle_timer->IsRunning())
@@ -204,8 +199,6 @@ void GameState::init()
 
 	m_is_debug_mode = false;
 	m_toggle_timer = new Timer(0.5f);
-
-	// Create Level 0
 
 	m_levels_path = m_assets_path + "levels/";
 	m_levels_enemies.resize(LEVELS_COUNT);
@@ -373,14 +366,10 @@ void GameState::init()
 			LEVEL_MAP_WIDTH,
 			LEVEL_MAP_HEIGHT,
 			m_level_paths[i],
-			m_parallax_path,
 			tileset_indices,
 			group_names,
 			group_indices,
-			layer_names,
-			parallax_names,
-			parallax_speeds_x,
-			parallax_speeds_y)
+			layer_names)
 		);
 	}
 
@@ -587,8 +576,6 @@ void GameState::init()
 		720.0f - 64.0f + 6 * LEVEL_OFFSET_X, 100.0f - 64.0f,
 		"Enemy18"));
 
-
-	Camera::inst()->setZoom(1.0f);
 	Camera::inst()->setBounds(0.0f, (float)(LEVELS_COUNT * (LEVEL_MAP_WIDTH * TILE_WIDTH) - CANVAS_WIDTH), 0.0f, (float)(LEVEL_MAP_HEIGHT * TILE_HEIGHT) - CANVAS_HEIGHT);
 
 	m_current_level_index = 0;

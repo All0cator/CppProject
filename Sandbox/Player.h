@@ -107,14 +107,12 @@ public:
 	void updateMovement(float dt);
 	void updateAreaDimensions();
 	void checkCollisions();
-	void flipAreasX();
 	void takeDmg(float ammount);
 	void correctPos(Area& other);
 	virtual void init() override;
 	virtual void draw() override;
 	virtual ~Player();
 	float getDmg();
-	//virtual void resolveCollision(Box& other) override;
 protected:
 	
 };
