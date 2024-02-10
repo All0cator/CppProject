@@ -40,8 +40,25 @@ Player::Player(GameState* gs,
 	m_hit_box = new Area(66.0f, 43.0f, left_pixels + 51.0f, top_pixels + 37.0f, std::bind(&Player::hit_box_callback, this, std::placeholders::_1), Area::AreaType::HITBOX, Area::OriginType::PLAYER, this);
 	m_hit_box->m_is_active = false;
 	m_jump_timer = new Timer(1.2f);
-	m_invincibility_timer = new Timer(1.0f);
+	m_invincibility_timer = new Timer(1.5f);
 	m_attack_timer = new Timer(1.0f);
+
+	m_hurt_sound_timer = new Timer(1.5f);
+	m_attack_sound_timer = new Timer(0.5f, false, std::bind(&Player::attack_sound_timer_callback, this));
+	m_attack_sound_timer->Stop();
+}
+
+void Player::attack_sound_timer_callback()
+{
+	if (m_is_enemy_hit)
+	{
+		graphics::playSound("assets/sounds/AttackHit2.wav", 0.3f, false);
+		m_is_enemy_hit = false;
+	}
+	else
+	{
+		graphics::playSound("assets/sounds/AttackMiss2.wav", 0.3f, false);
+	}
 }
 
 void Player::ground_collider_callback(Area& other)
@@ -88,6 +105,11 @@ void Player::hurt_box_callback(Area& other)
 		switch (other.m_origin)
 		{
 		case Area::OriginType::LEVEL:
+			if (!m_hurt_sound_timer->IsRunning())
+			{
+				graphics::playSound("assets/sounds/Sspike.wav", 0.6f);
+				m_hurt_sound_timer->Reset();
+			}
 			takeDmg(SPIKE_DMG);
 			correctPos(other);
 			break;
@@ -112,12 +134,16 @@ void Player::hit_box_callback(Area& other)
 {
 	switch (other.m_type)
 	{
-	case Area::AreaType::HITBOX:
+	case Area::AreaType::HURTBOX:
 
 		switch (other.m_origin)
 		{
 		case Area::OriginType::ENEMY:
-			static_cast<Enemy&>(*(other.m_origin_ptr)).takeDmg(m_dmg);
+			if (m_hit_box->m_is_active && static_cast<Enemy&>(*(other.m_origin_ptr)).m_can_interact)
+			{
+				m_is_enemy_hit = true;
+				static_cast<Enemy&>(*(other.m_origin_ptr)).takeDmg(m_dmg);
+			}
 			break;
 		}
 
@@ -148,11 +174,24 @@ void Player::update(float dt)
 	updateAreaDimensions(); // called before checking for collisions as we first move everything then check for collisions
 	checkCollisions();
 	//updateAreaDimensions(); // we might have moved so to technically be correct we need to update again our areas
-
+	if (m_is_attacking)
+	{
+		if (!m_attack_sound_timer->IsRunning() && m_is_first_hit)
+		{
+			m_attack_sound_timer->Reset();
+			if (m_is_enemy_hit)
+			{
+				graphics::playSound("assets/sounds/AttackHit1.wav", 0.3f, false);
+			}
+			else
+			{
+				graphics::playSound("assets/sounds/AttackMiss1.wav", 0.3f, false);
+			}
+			m_is_first_hit = false;
+		}
+	}
 	
-	//graphics::drawText(graphics::windowToCanvasX(this->getLeft()), graphics::windowToCanvasY(this->getRight()),  16.0f, "Player State: " + std::to_string(m_movement_state) + m_current_animation_name + std::to_string(m_current_frame_index) + "  " + std::to_string(m_frame_timer->GetAccumulatedTime()), m_debug_text);
-	graphics::drawText(graphics::windowToCanvasX(this->getLeft()), graphics::windowToCanvasY(this->getRight()), 16.0f, "Player Coords (" + std::to_string(getLeft()) + ", " + std::to_string(getTop()) + ")" + std::to_string(graphics::windowToCanvasX(512.0f, false)), m_debug_text);
-	//graphics::drawText(graphics::windowToCanvasX(this->getLeft()), graphics::windowToCanvasY(this->getRight()), 16.0f, "X_axis: " + std::to_string(m_hit_box->m_x_axis), m_debug_text);
+	//graphics::drawText(this->getLeft() - Camera::inst()->getFocalPointX(), this->getTop() - Camera::inst()->getFocalPointY(), 16.0f, "Player HP: (" + std::to_string(m_hp) + ")", m_debug_text);
 	GameObject::update(dt);
 }
 
@@ -232,6 +271,7 @@ void Player::updateInput()
 		{
 			m_attack_timer->Reset();
 			m_is_attacking = true;
+			m_is_first_hit = true;
 		}
 	}
 }
@@ -256,16 +296,16 @@ void Player::updateState()
 	m_hit_box->m_is_active = false;
 
 	// Dead frames
-	if (m_movement_state == State::TRANSITION_FALL && !m_animation_end)
-	{
-		return;
-	}
-	if (m_movement_state == State::TRANSITION_CROUCH && !m_animation_end) return;
 	if (m_is_attacking && !m_animation_end)
 	{
 		m_hit_box->m_is_active = true;
 		return;
 	}
+	if (m_movement_state == State::TRANSITION_FALL && !m_animation_end)
+	{
+		return;
+	}
+	if (m_movement_state == State::TRANSITION_CROUCH && !m_animation_end) return;
 
 	if (m_is_turning_arround)
 	{
@@ -470,6 +510,9 @@ void Player::updateTimers(float dt)
 	m_jump_timer->Update(dt);
 	m_invincibility_timer->Update(dt);
 	m_attack_timer->Update(dt);
+	
+	m_hurt_sound_timer->Update(dt);
+	m_attack_sound_timer->Update(dt);
 }
 
 void Player::updateMovement(float dt)
@@ -484,12 +527,23 @@ void Player::updateMovement(float dt)
 
 	m_x_axis_correction = true;
 	setLeft(getLeft() + m_velocity_x * m_direction_x * dt);
+	
+	if (getLeft() + 58.0f < 0.0f)
+	{
+		setLeft(0.0f - 58.0f);
+	}
+	else if (getRight() - 58.0f > LEVELS_COUNT * (LEVEL_MAP_WIDTH * TILE_WIDTH))
+	{
+		setRight(LEVELS_COUNT * (LEVEL_MAP_WIDTH * TILE_WIDTH) + 58.0f);
+	}
+
 	updateAreaDimensions();
 	m_state->checkCollisionsWithGround(*this->m_hurt_box);
 
 
 	m_x_axis_correction = false;
 	setTop(getTop() + 0.5f * m_acceleration_y * dt * dt + m_velocity_y * dt);
+
 	updateAreaDimensions();
 	m_state->checkCollisionsWithGround(*this->m_hurt_box);
 
@@ -564,8 +618,8 @@ void Player::init()
 	//m_scale_x = 0.25f;
 	//m_scale_y = 0.25f;
 
-	m_base_hp = 100.0f;
-	m_base_dmg = 100.0f;
+	m_base_hp = 300.0f;
+	m_base_dmg = 50.0f;
 	
 	m_hp = m_base_hp;
 	m_dmg = m_base_dmg;
@@ -590,6 +644,8 @@ void Player::init()
 	m_is_disabled = false;
 	m_is_turning_arround = false;
 	m_is_flickering = false;
+	m_is_enemy_hit = false;
+	m_is_first_hit = true;
 
 	SETCOLOR(m_brush.fill_color, 1.0f, 1.0f, 1.0f);
 	m_brush.fill_opacity = 1.0f;
@@ -598,7 +654,6 @@ void Player::init()
 
 	m_jump_timer->Reset();
 	m_invincibility_timer->Reset();
-	m_attack_timer->Reset();
 
 	GameObject::init();
 }
@@ -668,6 +723,8 @@ Player::~Player()
 	delete m_hurt_box;
 	delete m_hit_box;
 	delete m_jump_timer;
+	delete m_hurt_sound_timer;
+	delete m_attack_sound_timer;
 	delete m_invincibility_timer;
 	delete m_attack_timer;
 }

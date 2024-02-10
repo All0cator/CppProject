@@ -10,6 +10,7 @@ private:
 	Tileset* m_tileset;
 
 	// Number of tiles horizontally and vertically
+	float m_layer_offset_x;
 	int m_width;
 	int m_height;
 	// The array of indices
@@ -22,6 +23,7 @@ public:
 	Layer(GameState* gs,
 		  const std::string& name,
 		  Tileset * tileset,
+		  float layer_offset_x,
 		  int width,
 		  int height,
 		  const std::vector<int>& map);

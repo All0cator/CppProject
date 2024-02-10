@@ -7,6 +7,7 @@
 
 Layer::Layer(GameState* gs, const std::string& name, 
 			 Tileset * tileset, 
+			 float layer_offset_x,
 			 int width, int height, 
 			 const std::vector<int>& map)
 	: GameObject(gs, name)
@@ -16,7 +17,7 @@ Layer::Layer(GameState* gs, const std::string& name,
 	{
 		std::cout << "Error: Tileset is nullptr" << std::endl;
 	}
-
+	this->m_layer_offset_x = layer_offset_x;
 	this->m_width = width;
 	this->m_height = height;
 	this->m_map = map;
@@ -72,7 +73,7 @@ void Layer::draw()
 			if (map_value == -1) continue;
 			
 			// Culling if tile is inside window else skip
-			x_pixels = (x * TILE_WIDTH - focal_point_x);// + TILE_WIDTH * zoom;
+			x_pixels = (x * TILE_WIDTH + m_layer_offset_x - focal_point_x);// + TILE_WIDTH * zoom;
 			
 			//if (x_pixels > WINDOW_WIDTH || x_pixels + width_pixels < 0) continue;
 

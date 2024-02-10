@@ -150,7 +150,6 @@
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameState.cpp" />
-    <ClCompile Include="HitBox.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
@@ -172,10 +171,8 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="GraphicsConstants.h" />
-    <ClInclude Include="HitBox.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="Level.h" />
-    <ClInclude Include="MathUtil.h" />
     <ClInclude Include="ParallaxBackground.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Tileset.h" />

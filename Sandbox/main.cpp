@@ -28,7 +28,7 @@ int main()
 	graphics::setCanvasSize(GameState::inst()->getCanvasWidth(), GameState::inst()->getCanvasHeight());
 	graphics::setCanvasScaleMode(graphics::CANVAS_SCALE_FIT);
 	init();
-
+	graphics::playSound("assets/sounds/SBackground.wav", 0.1f, true);
 	graphics::startMessageLoop();
 	
 	return 0;

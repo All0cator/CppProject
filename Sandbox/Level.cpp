@@ -10,8 +10,10 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Camera.h"
+#include <iostream>
 
 Level::Level(GameState* gs,
+			 int level_index,
 			 const std::string& name,
 			 int level_map_width,
 			 int level_map_height,
@@ -26,6 +28,7 @@ Level::Level(GameState* gs,
 			 const std::vector<float>& parallax_speeds_y)
 	: GameObject(gs, name)
 {
+	this->m_level_index = level_index;
 	this->m_level_map_width = level_map_width;
 	this->m_level_map_height = level_map_height;
 	this->m_level_path = level_path;
@@ -38,15 +41,15 @@ Level::Level(GameState* gs,
 	this->m_parallax_speeds_x = parallax_speeds_x;
 	this->m_parallax_speeds_y = parallax_speeds_y;
 
-	m_parallax_backgrounds.resize(parallax_names.size());
+	//m_parallax_backgrounds.resize(parallax_names.size());
 }
 
 Level::~Level()
 {
-	for (int i = 0; i < m_parallax_backgrounds.size(); i++)
-	{
-		delete m_parallax_backgrounds[i];
-	}
+	//for (int i = 0; i < m_parallax_backgrounds.size(); i++)
+	//{
+	//	delete m_parallax_backgrounds[i];
+	//}
 
 	for (int i = 0; i < m_environment_layers.size(); i++)
 	{
@@ -61,10 +64,10 @@ Level::~Level()
 
 void Level::update(float dt)
 {
-	for (int i = 0; i < m_parallax_backgrounds.size(); i++)
+	/*for (int i = 0; i < m_parallax_backgrounds.size(); i++)
 	{
 		m_parallax_backgrounds[i]->update(dt);
-	}
+	}*/
 
 	for (int i = 0; i < m_environment_layers.size(); i++)
 	{
@@ -76,24 +79,23 @@ void Level::update(float dt)
 #include <iostream>
 void Level::init()
 {
-	Camera::inst()->setBounds(0.0f, (float)(m_level_map_width * TILE_WIDTH) - CANVAS_WIDTH, 0.0f, (float)(m_level_map_height * TILE_HEIGHT) - CANVAS_HEIGHT);
 	m_camera_min_x = Camera::inst()->getMinX();
 	m_camera_max_x = Camera::inst()->getMaxX();
 	m_camera_min_y = Camera::inst()->getMinY();
 	m_camera_max_y = Camera::inst()->getMaxY();
 
-	for (int i = 0; i < m_parallax_backgrounds.size(); i++)
+	/*for (int i = 0; i < m_parallax_backgrounds.size(); i++)
 	{
 		m_parallax_backgrounds[i] = new ParallaxBackground(GameState::inst(), 
 														   m_parallax_names[i],
 														   m_parallax_path,
 														   (float)PARALLAX_WIDTH, (float)PARALLAX_HEIGHT,
-														   0.0f, 0.0f, 
+														   m_level_index * LEVEL_OFFSET_X, 0.0f, 
 														   (float)(m_level_map_width * TILE_WIDTH), (float)(m_level_map_height * TILE_HEIGHT),
 														   m_parallax_speeds_x[i], m_parallax_speeds_y[i],
 														   true, false);
 		m_parallax_backgrounds[i]->init();
-	}
+	}*/
 
 	ParseInfo info = {};
 	std::string group_name;
@@ -103,7 +105,6 @@ void Level::init()
 	for (int i = 0; i < m_layer_names.size(); i++)
 	{
 		info = CSVParse::parseInts(m_level_path + m_name + "._" + m_group_names[m_group_indices[i]] + "_" + m_layer_names[i], ',');
-		std::cout << info.width << " " << info.height << std::endl;
 		group_name = m_group_names[m_group_indices[i]];
 
 		if (group_name == GROUP_NAME_ENVIRONMENT)
@@ -111,6 +112,7 @@ void Level::init()
 			m_environment_layers.push_back(new Layer(GameState::inst(),
 												m_layer_names[i],
 												m_state->getTileset(m_tileset_indices[i]),
+												m_level_index * LEVEL_OFFSET_X,
 												info.width, info.height,
 												info.int_array));
 
@@ -130,7 +132,7 @@ void Level::init()
 					if (info.int_array[index] == TILE_SPIKE)
 					{
 						m_solid_tile_areas.push_back(new Area((float)(TILE_WIDTH), (float)(TILE_HEIGHT),
-															  (float)(x * TILE_WIDTH), (float)(y * TILE_HEIGHT),
+															  (float)(x * TILE_WIDTH + m_level_index * LEVEL_OFFSET_X), (float)(y * TILE_HEIGHT),
 															  nullptr,
 															  Area::AreaType::SPIKE, Area::OriginType::LEVEL, this));
 
@@ -139,7 +141,7 @@ void Level::init()
 					else if (info.int_array[index] == TILE_SOLID_TILE)
 					{
 						m_solid_tile_areas.push_back(new Area((float)(TILE_WIDTH), (float)(TILE_HEIGHT),
-															  (float)(x * TILE_WIDTH), (float)(y * TILE_HEIGHT),
+															  (float)(x * TILE_WIDTH + m_level_index * LEVEL_OFFSET_X), (float)(y * TILE_HEIGHT),
 															  nullptr,
 															  Area::AreaType::TILE, Area::OriginType::LEVEL, this));
 
@@ -155,10 +157,10 @@ void Level::init()
 
 void Level::draw()
 {
-	for (int i = 0; i < m_parallax_backgrounds.size(); i++)
-	{
-		m_parallax_backgrounds[i]->draw();
-	}
+	//for (int i = 0; i < m_parallax_backgrounds.size(); i++)
+	//{
+	//	m_parallax_backgrounds[i]->draw();
+	//}
 
 	for (int i = 0; i < m_environment_layers.size(); i++)
 	{
@@ -191,7 +193,7 @@ void Level::checkCollisions(Area& area)
 	
 	if (area.m_type == Area::AreaType::HURTBOX)
 	{
-		checkBoundsCollisions(area);
+		//checkBoundsCollisions(area);
 	}
 }
 

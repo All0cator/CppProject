@@ -21,7 +21,7 @@
 // Parallax
 
 #define PARALLAX_WIDTH 512
-#define PARALLAX_HEIGHT 320
+#define PARALLAX_HEIGHT 512
 
 #define PARALLAX_NAME_0					"CloudsBack"
 #define PARALLAX_NAME_0_SPEED_X			0.25f

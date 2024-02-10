@@ -13,6 +13,7 @@ class Box;
 class Tileset;
 class Enemy;
 class Timer;
+class ParallaxBackground;
 
 class GameState
 {
@@ -27,7 +28,8 @@ private:
 
 
 	std::string m_levels_path;
-	std::string m_level0_path;
+	std::vector<std::string> m_level_paths;
+	std::vector<std::string> m_level_names;
 	std::vector<std::string> group_names;
 	std::vector<int> group_indices;
 	std::vector<std::string> layer_names;
@@ -68,11 +70,10 @@ private:
 	std::string m_window_title;
 
 	Timer* m_toggle_timer;
-
-	Level* m_current_level;
 	
 	Player * m_player;
-	std::vector<Enemy*> m_enemies;
+	std::vector<ParallaxBackground*> m_parallax_backgrounds;
+	std::vector<std::vector<Enemy*>> m_levels_enemies;
 	std::vector<Level*> m_levels;
 	std::vector<Tileset*> m_tilesets;
 
@@ -81,6 +82,7 @@ private:
 	float m_min_bottom;
 	float m_max_top;
 
+	int m_current_level_index;
 
 public:
 	bool m_is_debug_mode;

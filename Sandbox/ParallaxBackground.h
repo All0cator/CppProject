@@ -5,7 +5,6 @@
 class ParallaxBackground : public GameObject
 {
 private:
-
 	float m_width_pixels;
 	float m_height_pixels;
 

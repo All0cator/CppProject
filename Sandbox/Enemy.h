@@ -36,6 +36,7 @@ public:
 	Area* m_notice_area;
 private:
 	Timer* m_invincibility_timer; 
+	Timer* m_sound_timer;
 
 	float m_base_hp;
 	float m_base_dmg;
@@ -65,7 +66,9 @@ private:
 	bool m_is_moving;
 	bool m_is_attacking;
 	bool m_animation_end;
+public:
 	bool m_can_interact;
+private:
 	bool m_is_disabled;
 	bool m_is_flickering;
 

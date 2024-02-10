@@ -35,11 +35,12 @@ Enemy::Enemy(GameState* gs,
 	this->m_texture_half_height = height_pixels / 2.0f;
 
 	m_side_collider = new Area(12.0f, 32.0f, left_pixels + 69.0f, top_pixels + 47.0f, std::bind(&Enemy::side_collider_callback, this, std::placeholders::_1), Area::AreaType::COLLIDER, Area::OriginType::ENEMY, this);
-	m_hurt_box = new Area(22.0f, 31.0f, left_pixels + 55.0f, top_pixels + 47.0f, std::bind(&Enemy::hurt_box_callback, this, std::placeholders::_1), Area::AreaType::HURTBOX, Area::OriginType::ENEMY, this);
-	m_hit_box = new Area(22.0f, 31.0f, left_pixels + 54.0f, top_pixels + 47.0f, std::bind(&Enemy::hit_box_callback, this, std::placeholders::_1), Area::AreaType::HITBOX, Area::OriginType::ENEMY, this);
+	m_hurt_box = new Area(22.0f, 31.0f, left_pixels + 58.0f, top_pixels + 46.0f, std::bind(&Enemy::hurt_box_callback, this, std::placeholders::_1), Area::AreaType::HURTBOX, Area::OriginType::ENEMY, this);
+	m_hit_box = new Area(40.0f, 31.0f, left_pixels + 54.0f, top_pixels + 47.0f, std::bind(&Enemy::hit_box_callback, this, std::placeholders::_1), Area::AreaType::HITBOX, Area::OriginType::ENEMY, this);
 	m_notice_area = new Area(width_pixels * 1.5f, height_pixels * 1.5f, left_pixels - 0.75f * width_pixels, top_pixels - 0.75f * height_pixels, std::bind(&Enemy::noticeAreaCallback, this, std::placeholders::_1), Area::AreaType::COLLIDER, Area::OriginType::ENEMY, this);
 
-	m_invincibility_timer = new Timer(0.5f);
+	m_invincibility_timer = new Timer(1.5f);
+	m_sound_timer = new Timer(1.5f);
 }
 
 void Enemy::side_collider_callback(Area& other)
@@ -51,7 +52,7 @@ void Enemy::side_collider_callback(Area& other)
 		switch (other.m_origin)
 		{
 		case Area::OriginType::LEVEL:
-			m_direction_x *= -1;
+			//m_direction_x *= -1;
 			break;
 		}
 
@@ -73,12 +74,20 @@ void Enemy::hurt_box_callback(Area& other)
 		}
 
 		break;
+	case Area::AreaType::SPIKE:
+		switch (other.m_origin)
+		{
+		case Area::OriginType::LEVEL:
+			correctPos(other);
+			break;
+		}
+		break;
 	case Area::AreaType::HURTBOX:
 
 		switch (other.m_origin)
 		{
 		case Area::OriginType::PLAYER:
-			static_cast<Player&>(*other.m_origin_ptr).takeDmg(m_dmg);
+			//static_cast<Player&>(*other.m_origin_ptr).takeDmg(m_dmg);
 			break;
 		}
 
@@ -105,7 +114,11 @@ void Enemy::hit_box_callback(Area& other)
 		switch (other.m_origin)
 		{
 		case Area::OriginType::PLAYER:
-			static_cast<Player&>(*other.m_origin_ptr).takeDmg(m_dmg);
+			if (static_cast<Player&>(*(other.m_origin_ptr)).m_can_interact)
+			{
+				m_is_attacking = true;
+				static_cast<Player&>(*other.m_origin_ptr).takeDmg(m_dmg);
+			}
 			break;
 		}
 
@@ -123,7 +136,12 @@ void Enemy::noticeAreaCallback(Area& other)
 		{
 		case Area::OriginType::PLAYER:
 
-			m_orientation_x = static_cast<Player&>(*(other.m_origin_ptr)).getLeft() - this->getLeft() > 0.0f ? 1 : -1;
+			if (static_cast<Player&>(*(other.m_origin_ptr)).m_can_interact)
+			{
+				m_orientation_x = static_cast<Player&>(*(other.m_origin_ptr)).getLeft() - this->getLeft() > 0.0f ? 1 : -1;
+				m_is_moving = true;
+				m_velocity_x = 50.0f;
+			}
 			flipAreasX();
 
 			break;
@@ -140,23 +158,41 @@ void Enemy::update(float dt)
 	if (m_movement_state != State::DEAD)
 	{
 		updateInput();
+		if (m_velocity_y >= 0.0f)
+		{
+			m_direction_y = 1.0f;
+		}
+		else
+		{
+			m_direction_y = -1.0f;
+		}
 	}
+	m_state->checkCollisionWithPlayer(*this->m_notice_area);
 	updateState();
 	updateAnimation();
 	updateTimers(dt);
 	updateMovement(dt);
 	updateAreaDimensions();
 	checkCollisions();
-	updateAreaDimensions(); // We might have moved in collisions so we need to adjust everything again
+	//updateAreaDimensions(); // We might have moved in collisions so we need to adjust everything again
 
 	GameObject::update(dt);
 }
 
 void Enemy::updateInput()
 {
-	m_direction_x = (float)m_orientation_x;
-}
+	m_is_moving = false;
 
+	if (m_orientation_x > 0.0f)
+	{
+		m_direction_x = 1.0f;
+	}
+	else // m_orientation_x < 0.0f
+	{
+		m_direction_x = -1.0f;
+	}
+}
+#include <iostream>
 void Enemy::updateState()
 {
 	if (m_hp <= 0.0f)
@@ -165,6 +201,7 @@ void Enemy::updateState()
 		m_can_interact = false;
 		return;
 	}
+	m_hit_box->m_is_active = false;
 
 	if (m_is_flickering)
 	{
@@ -172,11 +209,11 @@ void Enemy::updateState()
 		return;
 	}
 
-	m_hit_box->m_is_active = false;
 
-	if (m_is_attacking && !m_animation_end) 
+	if (m_is_attacking) 
 	{ 
 		m_movement_state = State::ATTACK;  
+		m_is_moving = false;
 		m_hit_box->m_is_active = true; 
 		return; 
 	}
@@ -209,9 +246,17 @@ void Enemy::updateAnimation()
 		break;
 	case State::HIT:
 		m_animation_end = playAnimation(SKELETON_ANIM_HIT);
+		if (m_animation_end)
+		{
+			m_is_flickering = false;
+		}
 		break;
 	case State::ATTACK:
 		m_animation_end = playAnimation(SKELETON_ANIM_ATTACK);
+		if (m_animation_end)
+		{
+			m_is_attacking = false;
+		}
 		break;
 	}
 }
@@ -220,6 +265,7 @@ void Enemy::updateTimers(float dt)
 {
 	updateAnimationTimer(dt);
 	m_invincibility_timer->Update(dt);
+	m_sound_timer->Update(dt);
 }
 
 void Enemy::updateMovement(float dt)
@@ -231,7 +277,7 @@ void Enemy::updateMovement(float dt)
 		m_direction_x = m_direction_x / m_direction_length;
 		m_direction_y = m_direction_y / m_direction_length;
 	}
-
+	if (!m_is_moving) return;
 
 	m_x_axis_correction = true;
 	setLeft(getLeft() + m_velocity_x * m_direction_x * dt);
@@ -263,8 +309,8 @@ void Enemy::updateAreaDimensions()
 
 	m_side_collider->updatePositions(this->getLeft() + 69.0f, this->getTop() + 47.0f, m_new_x_axis);
 	m_hurt_box->updatePositions(this->getLeft() + 58.0f, this->getTop() + 46.0f, m_new_x_axis);
+	SETCOLOR(m_hurt_box->m_debug_box_brush.outline_color, 1.0f, 0.0f, 1.0f);
 	m_hit_box->updatePositions(this->getLeft() + 54.0f, this->getTop() + 47.0f, m_new_x_axis);
-	SETCOLOR(m_hit_box->m_debug_box_brush.outline_color, 1.0f, 0.0f, 1.0f);
 	m_notice_area->updatePositions(this->getLeft() -  0.25f * m_texture_width, this->getTop() - 0.25f * m_texture_height, m_new_x_axis);
 
 	if (m_orientation_x == -1)
@@ -282,7 +328,7 @@ void Enemy::checkCollisions()
 	m_state->checkCollisionWithPlayer(*m_hurt_box);
 	//m_state->checkCollisionsWithGround(*m_hurt_box);
 	m_state->checkCollisionsWithGround(*m_side_collider);
-	m_state->checkCollisionWithPlayer(*m_notice_area);
+	//m_state->checkCollisionWithPlayer(*m_notice_area);
 }
 
 void Enemy::flipAreasX()
@@ -299,6 +345,11 @@ void Enemy::takeDmg(float ammount)
 
 	if (!m_invincibility_timer->IsRunning())
 	{
+		if (!m_sound_timer->IsRunning())
+		{
+			graphics::playSound("assets/sounds/Sdeath.wav", 1.0f, false);
+			m_sound_timer->Reset();
+		}
 		m_hp -= ammount;
 		m_is_flickering = true;
 		m_invincibility_timer->Start();
@@ -357,9 +408,9 @@ void Enemy::init()
 	m_direction_x = 0.0f;
 	m_direction_y = 0.0f;
 
-	m_velocity_x = 0.0f;
-	//m_acceleration_y = 150.0f;
-	m_velocity_y = 0;// m_acceleration_y;
+	m_velocity_x = 50.0f;
+	m_acceleration_y = 150.0f;
+	m_velocity_y = m_acceleration_y;
 	m_max_velocity_y = 100.0f;
 
 	m_is_moving = false;
@@ -453,6 +504,7 @@ float Enemy::getDmg()
 Enemy::~Enemy()
 {
 	delete m_invincibility_timer;
+	delete m_sound_timer;
 	delete m_side_collider;
 	delete m_hurt_box;
 	delete m_hit_box;

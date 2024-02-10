@@ -57,9 +57,6 @@
     <ClCompile Include="Enemy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HitBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Area.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -116,13 +113,7 @@
     <ClInclude Include="Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HitBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Area.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MathUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tileset.h">

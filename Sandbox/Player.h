@@ -34,6 +34,9 @@ private:
 	Timer* m_invincibility_timer;
 	Timer* m_attack_timer;
 
+	Timer* m_hurt_sound_timer;
+	Timer* m_attack_sound_timer;
+
 	float m_base_hp;
 	float m_base_dmg;
 
@@ -59,7 +62,11 @@ private:
 	bool m_is_crouched;
 	bool m_transitioning_crouch;
 	bool m_is_attacking;
+	bool m_is_enemy_hit;
+	bool m_is_first_hit;
+public:
 	bool m_can_interact;
+private:
 	bool m_is_disabled;
 	bool m_animation_end;
 	bool m_is_turning_arround;
@@ -88,6 +95,7 @@ public:
 		   float R = 0.0f,
 		   float G = 0.0f,
 		   float B = 1.0f);
+	void attack_sound_timer_callback();
 	void ground_collider_callback(Area& other);
 	void hurt_box_callback(Area& other);
 	void hit_box_callback(Area& other);

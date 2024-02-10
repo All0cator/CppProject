@@ -19,7 +19,7 @@ ParallaxBackground::ParallaxBackground(GameState * gs,
 	this->m_height_pixels = height_pixels;
 	this->m_width_canvas = 512.0f; //graphics::windowToCanvasX(m_width_pixels, false);
 	this->m_half_width_canvas = this->m_width_canvas / 2.0f;
-	this->m_height_canvas = 320.0f;//graphics::windowToCanvasY(m_height_pixels, false);
+	this->m_height_canvas = 512.0f;//graphics::windowToCanvasY(m_height_pixels, false);
 	this->m_half_height_canvas = this->m_height_canvas / 2.0f;
 	this->m_pos_x_pixels = pos_x_pixels;
 	this->m_pos_y_pixels = pos_y_pixels;
@@ -55,21 +55,21 @@ void ParallaxBackground::init()
 
 void ParallaxBackground::draw()
 {	
-	float x_pos_start = 0.0f - Camera::inst()->getFocalPointX();
-	float y_pos_start = 0.0f - Camera::inst()->getFocalPointY();
+	float x_pos_start = m_pos_x_pixels - Camera::inst()->getFocalPointX();
+	float y_pos_start = m_pos_y_pixels - Camera::inst()->getFocalPointY();
 
 	int window_width_pixels = m_state->getWindowWidth();
 	int window_height_pixels = m_state->getWindowHeight();
 
 
-	//while (x_pos_start < m_map_width_pixels)
-	//{
-		//graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
-		//x_pos_start += m_width_pixels;
-	//}
-	graphics::drawRect(0.0f + 200.0f, 0.0f + 200.0f, 500.0f, 500.0f, m_brush);
 
-	//graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
+	while (x_pos_start < m_pos_x_pixels * 2.0f)
+	{
+		graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
+		x_pos_start += m_width_pixels;
+	}
+
+	graphics::drawRect(x_pos_start + m_width_pixels / 2.0f, y_pos_start + m_height_pixels / 2.0f, m_width_pixels, m_height_pixels, m_brush);
 
 
 	GameObject::draw();

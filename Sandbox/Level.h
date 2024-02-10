@@ -10,6 +10,7 @@ class Box;
 class Level : public GameObject
 {
 private:
+	int m_level_index;
 	int m_level_map_width;
 	int m_level_map_height;
 
@@ -18,7 +19,7 @@ private:
 	float m_camera_min_y;
 	float m_camera_max_y;
 
-	std::vector<ParallaxBackground*> m_parallax_backgrounds;
+	//std::vector<ParallaxBackground*> m_parallax_backgrounds;
 	std::vector<Layer*> m_environment_layers;
 	std::vector<Area*> m_solid_tile_areas;
 
@@ -35,6 +36,7 @@ private:
 
 public:
 	Level(GameState* gs, 
+		  int level_index,
 		  const std::string& name,
 		  int level_map_width,
 		  int level_map_height,
